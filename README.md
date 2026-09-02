@@ -55,6 +55,3 @@ Como alternativa, también puede usar `.\SQLEXPRESS`. La cadena de conexión se 
 
 El esquema incluye las tablas `Usuario`, `Rol`, `Patente`, `Familia`, sus relaciones, `Evento` y `DV`.
 
-## Estado actual
-
-El proyecto ya cuenta con la base de seguridad y administración. El siguiente paso es incorporar un módulo de negocio completo y vincular sus operaciones con permisos, bitácora e integridad de datos.
