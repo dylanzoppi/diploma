@@ -6,7 +6,7 @@ namespace DAL
 {
     public class BackupDAL_33ZS
     {
-        private static readonly string[] InstanciasSql_33ZS = { ".", @".\SQLEXPRESS", @"(localdb)\MSSQLLocalDB" };
+        private static readonly string[] InstanciasSql_33ZS = { @"(localdb)\MSSQLLocalDB", @".\SQLEXPRESS" };
         private static string cadenaMaster_33ZS;
 
         private static string ObtenerCadenaMaster_33ZS()
