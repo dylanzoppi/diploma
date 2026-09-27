@@ -14,18 +14,15 @@ namespace TpIngSoftware
 {
     public partial class CambiarClave33ZS : Form, IObservador_33ZS
     {
-        private UsuarioBLL_33ZS usuarioBLL = new UsuarioBLL_33ZS();
-        private readonly BitacoraEventoBLL_33ZS bitacoraBLL = new BitacoraEventoBLL_33ZS();
+        private UsuarioBLL_33ZS usuarioBLL;
+        private BitacoraEventoBLL_33ZS bitacoraBLL;
 
         public CambiarClave33ZS()
         {
             InitializeComponent();
+            AplicarDiseno_33ZS();
 
-            aceptarBTN.Click += aceptarBTN_Click;
-            cancelarBTN.Click += cancelarBTN_Click;
             mostrarClavesCHK.CheckedChanged += mostrarClavesCHK_CheckedChanged;
-            this.Load += CambiarClave33ZS_Load;
-
             claveActualTXT.TextChanged += claveTXT_TextChanged;
             claveNuevaTXT.TextChanged += claveTXT_TextChanged;
             claveRepetirTXT.TextChanged += claveTXT_TextChanged;
@@ -33,11 +30,13 @@ namespace TpIngSoftware
             this.AcceptButton = aceptarBTN;
             this.CancelButton = cancelarBTN;
 
-            SessionManager_33ZS.GetInstance_33ZS().Suscribir_33ZS(this);
-            this.FormClosed += (s, e) =>
-                SessionManager_33ZS.GetInstance_33ZS().Desuscribir_33ZS(this);
-
-            Actualizar_33ZS();
+            if (LicenseManager.UsageMode != LicenseUsageMode.Designtime)
+            {
+                SessionManager_33ZS.GetInstance_33ZS().Suscribir_33ZS(this);
+                this.FormClosed += (s, e) =>
+                    SessionManager_33ZS.GetInstance_33ZS().Desuscribir_33ZS(this);
+                Actualizar_33ZS();
+            }
         }
 
         public void Actualizar_33ZS()
@@ -60,6 +59,10 @@ namespace TpIngSoftware
 
         private void CambiarClave33ZS_Load(object sender, EventArgs e)
         {
+            if (LicenseManager.UsageMode == LicenseUsageMode.Designtime)
+                return;
+            usuarioBLL = new UsuarioBLL_33ZS();
+            bitacoraBLL = new BitacoraEventoBLL_33ZS();
             ConfigurarFormulario_33ZS();
         }
         private void claveTXT_TextChanged(object sender, EventArgs e)

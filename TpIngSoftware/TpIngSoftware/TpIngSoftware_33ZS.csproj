@@ -79,6 +79,9 @@
     <Compile Include="PN1\CatalogoForm_33ZS.cs" />
     <Compile Include="PN1\NuevaAtencionForm_33ZS.cs" />
     <Compile Include="PN1\HistorialForm_33ZS.cs" />
+    <Compile Include="Presentacion\EstiloPantallas_33ZS.cs" />
+    <Compile Include="Presentacion\PantallasAccesoMantenimiento_33ZS.cs" />
+    <Compile Include="Presentacion\PantallasAdministracion_33ZS.cs" />
     <Compile Include="Administracion\Perfiles\GestionPerfiles_33ZS.cs">
       <SubType>Form</SubType>
     </Compile>

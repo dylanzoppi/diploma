@@ -40,32 +40,33 @@ namespace TpIngSoftware.PN1
 
         internal static TextBox Entrada(int ancho = 180) => new TextBox
         {
-            Width = ancho, Margin = new Padding(0, 4, 14, 4)
+            Width = ancho, Margin = new Padding(0, 4, 14, 4),
+            BackColor = Color.FromArgb(250, 248, 245),
+            BorderStyle = BorderStyle.FixedSingle
         };
 
-        internal static Button Boton(string texto, bool principal = false) => new Button
+        internal static Button Boton(string texto, bool principal = false)
         {
-            Text = texto, AutoSize = true, MinimumSize = new Size(118, 38),
-            FlatStyle = FlatStyle.Flat,
-            BackColor = principal ? Acento : Superficie,
-            ForeColor = principal ? Color.White : Tinta,
-            Margin = new Padding(0, 4, 12, 4),
-            Cursor = Cursors.Hand
-        };
+            var boton = new Button
+            {
+                Text = texto, AutoSize = true, MinimumSize = new Size(118, 40),
+                FlatStyle = FlatStyle.Flat,
+                BackColor = principal ? Acento : Superficie,
+                ForeColor = principal ? Color.White : Tinta,
+                Font = new Font("Segoe UI Semibold", 10F),
+                Margin = new Padding(0, 4, 12, 4),
+                Cursor = Cursors.Hand
+            };
+            boton.FlatAppearance.BorderColor = principal ? Acento : EstiloPantallas_33ZS.Borde;
+            return boton;
+        }
 
-        internal static DataGridView Tabla() => new DataGridView
+        internal static DataGridView Tabla()
         {
-            Dock = DockStyle.Fill,
-            ReadOnly = true,
-            AllowUserToAddRows = false,
-            AllowUserToDeleteRows = false,
-            AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill,
-            SelectionMode = DataGridViewSelectionMode.FullRowSelect,
-            MultiSelect = false,
-            BackgroundColor = Superficie,
-            BorderStyle = BorderStyle.None,
-            RowHeadersVisible = false
-        };
+            var tabla = new DataGridView();
+            EstiloPantallas_33ZS.Grilla(tabla);
+            return tabla;
+        }
 
         internal static FlowLayoutPanel Fila() => new FlowLayoutPanel
         {

@@ -2,6 +2,7 @@
 using Servicios;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
@@ -9,15 +10,16 @@ namespace TpIngSoftware
 {
     public partial class Login33ZS : Form, IObservador_33ZS
     {
-        private UsuarioBLL_33ZS usuarioBLL = new UsuarioBLL_33ZS();
-        private DigitoVerificadorBLL_33ZS dvBLL = new DigitoVerificadorBLL_33ZS();
-        private PerfilBLL_33ZS perfilBLL = new PerfilBLL_33ZS();
+        private UsuarioBLL_33ZS usuarioBLL;
+        private DigitoVerificadorBLL_33ZS dvBLL;
+        private PerfilBLL_33ZS perfilBLL;
         private bool cerrarAplicacionAlCancelar_33ZS = true;
         private bool abrirMenuAlIngresar_33ZS = true;
 
         public Login33ZS(bool cerrarAplicacionAlCancelar, bool abrirMenuAlIngresar)
         {
             InitializeComponent();
+            AplicarDiseno_33ZS();
 
             cerrarAplicacionAlCancelar_33ZS = cerrarAplicacionAlCancelar;
             abrirMenuAlIngresar_33ZS = abrirMenuAlIngresar;
@@ -25,8 +27,6 @@ namespace TpIngSoftware
             ingresarBTN.Click += ingresarBTN_Click;
             cancelarBTN.Click += cancelarBTN_Click;
             mostrarPasswordCHK.CheckedChanged += mostrarPasswordCHK_CheckedChanged;
-            this.Load += Login33ZS_Load;
-
             this.AcceptButton = ingresarBTN;
             this.CancelButton = cancelarBTN;
 
@@ -35,6 +35,7 @@ namespace TpIngSoftware
         public Login33ZS()
         {
             InitializeComponent();
+            AplicarDiseno_33ZS();
 
             ingresarBTN.Click += ingresarBTN_Click;
             cancelarBTN.Click += cancelarBTN_Click;
@@ -48,6 +49,8 @@ namespace TpIngSoftware
 
         private void InicializarObservadorIdioma_33ZS()
         {
+            if (LicenseManager.UsageMode == LicenseUsageMode.Designtime)
+                return;
             SessionManager_33ZS.GetInstance_33ZS().Suscribir_33ZS(this);
             this.FormClosed += (s, e) =>
                 SessionManager_33ZS.GetInstance_33ZS().Desuscribir_33ZS(this);
@@ -69,6 +72,11 @@ namespace TpIngSoftware
 
         private void Login33ZS_Load(object sender, EventArgs e)
         {
+            if (LicenseManager.UsageMode == LicenseUsageMode.Designtime)
+                return;
+            usuarioBLL = new UsuarioBLL_33ZS();
+            dvBLL = new DigitoVerificadorBLL_33ZS();
+            perfilBLL = new PerfilBLL_33ZS();
             ConfigurarLogin_33ZS();
         }
 

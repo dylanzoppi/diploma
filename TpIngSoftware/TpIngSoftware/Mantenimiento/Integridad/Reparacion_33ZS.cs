@@ -2,6 +2,7 @@ using BLL;
 using Servicios;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.IO;
 using System.Windows.Forms;
 
@@ -11,9 +12,9 @@ namespace TpIngSoftware
     {
         public enum ResultadoReparacion_33ZS { Recalculado, Restaurado, Salir }
 
-        private readonly DigitoVerificadorBLL_33ZS dvBLL = new DigitoVerificadorBLL_33ZS();
-        private readonly BackupBLL_33ZS backupBLL = new BackupBLL_33ZS();
-        private readonly BitacoraEventoBLL_33ZS bitacoraBLL = new BitacoraEventoBLL_33ZS();
+        private DigitoVerificadorBLL_33ZS dvBLL;
+        private BackupBLL_33ZS backupBLL;
+        private BitacoraEventoBLL_33ZS bitacoraBLL;
         private readonly List<string> tablasInconsistentes_33ZS;
 
         public ResultadoReparacion_33ZS Resultado { get; private set; } = ResultadoReparacion_33ZS.Salir;
@@ -21,10 +22,17 @@ namespace TpIngSoftware
         public Reparacion_33ZS(List<string> tablasInconsistentes)
         {
             InitializeComponent();
+            AplicarDiseno_33ZS();
             tablasInconsistentes_33ZS = tablasInconsistentes ?? new List<string>();
-            SessionManager_33ZS.GetInstance_33ZS().Suscribir_33ZS(this);
-            this.FormClosed += (s, e) => SessionManager_33ZS.GetInstance_33ZS().Desuscribir_33ZS(this);
-            Actualizar_33ZS();
+            if (LicenseManager.UsageMode != LicenseUsageMode.Designtime)
+            {
+                dvBLL = new DigitoVerificadorBLL_33ZS();
+                backupBLL = new BackupBLL_33ZS();
+                bitacoraBLL = new BitacoraEventoBLL_33ZS();
+                SessionManager_33ZS.GetInstance_33ZS().Suscribir_33ZS(this);
+                this.FormClosed += (s, e) => SessionManager_33ZS.GetInstance_33ZS().Desuscribir_33ZS(this);
+                Actualizar_33ZS();
+            }
         }
 
         public void Actualizar_33ZS()

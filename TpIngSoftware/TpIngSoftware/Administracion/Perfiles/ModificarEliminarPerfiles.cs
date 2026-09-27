@@ -4,6 +4,7 @@ using Servicios.Composite;
 using System;
 using System.Diagnostics;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Drawing;
 using System.Windows.Forms;
 
@@ -30,12 +31,10 @@ namespace TpIngSoftware.Administracion.Perfiles
         public ModificarEliminarPerfiles()
         {
             InitializeComponent();
-            ConfigurarIconosArbol_33ZS();
-            ConfigurarFiltroInicial_33ZS();
-            InicializarEventos();
-            CargarDatosDB();
-            AplicarPermisos_33ZS();
+            AplicarDiseno_33ZS();
 
+            if (LicenseManager.UsageMode == LicenseUsageMode.Designtime)
+                return;
             SessionManager_33ZS.GetInstance_33ZS().Suscribir_33ZS(this);
             this.FormClosed += (s, e) =>
                 SessionManager_33ZS.GetInstance_33ZS().Desuscribir_33ZS(this);
@@ -588,7 +587,13 @@ namespace TpIngSoftware.Administracion.Perfiles
 
         private void ModificarEliminarPerfiles_Load(object sender, EventArgs e)
         {
-
+            if (LicenseManager.UsageMode == LicenseUsageMode.Designtime)
+                return;
+            ConfigurarIconosArbol_33ZS();
+            ConfigurarFiltroInicial_33ZS();
+            InicializarEventos();
+            CargarDatosDB();
+            AplicarPermisos_33ZS();
         }
 
         private void eliminarBTN_Click(object sender, EventArgs e)

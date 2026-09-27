@@ -1,6 +1,7 @@
 using BLL;
 using Servicios;
 using System;
+using System.ComponentModel;
 using System.Windows.Forms;
 
 namespace TpIngSoftware
@@ -13,13 +14,15 @@ namespace TpIngSoftware
         public Respaldo_33ZS()
         {
             InitializeComponent();
+            AplicarDiseno_33ZS();
 
-            SessionManager_33ZS.GetInstance_33ZS().Suscribir_33ZS(this);
-            this.FormClosed += (s, e) =>
-                SessionManager_33ZS.GetInstance_33ZS().Desuscribir_33ZS(this);
-
-            Actualizar_33ZS();
-            PrecargarCarpetaPorDefecto_33ZS();
+            if (LicenseManager.UsageMode != LicenseUsageMode.Designtime)
+            {
+                SessionManager_33ZS.GetInstance_33ZS().Suscribir_33ZS(this);
+                this.FormClosed += (s, e) =>
+                    SessionManager_33ZS.GetInstance_33ZS().Desuscribir_33ZS(this);
+                Actualizar_33ZS();
+            }
         }
 
         private void PrecargarCarpetaPorDefecto_33ZS()
@@ -140,7 +143,8 @@ namespace TpIngSoftware
 
         private void Respaldo_33ZS_Load(object sender, EventArgs e)
         {
-
+            if (LicenseManager.UsageMode != LicenseUsageMode.Designtime)
+                PrecargarCarpetaPorDefecto_33ZS();
         }
     }
 }

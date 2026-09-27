@@ -13,16 +13,18 @@ namespace TpIngSoftware
 {
     public partial class BitacoraEventos33ZS : Form, IObservador_33ZS
     {
-        BitacoraEventoBLL_33ZS bitacoraBLL = new BitacoraEventoBLL_33ZS();
-        UsuarioBLL_33ZS usuarioBLL = new UsuarioBLL_33ZS();
+        private BitacoraEventoBLL_33ZS bitacoraBLL;
+        private UsuarioBLL_33ZS usuarioBLL;
         private int filaActualImpresion_33ZS;
         private List<DataGridViewColumn> columnasImpresion_33ZS = new List<DataGridViewColumn>();
 
         public BitacoraEventos33ZS()
         {
             InitializeComponent();
-            imprimirBTN.Click += imprimirBTN_Click;
+            AplicarDiseno_33ZS();
 
+            if (LicenseManager.UsageMode == LicenseUsageMode.Designtime)
+                return;
             SessionManager_33ZS.GetInstance_33ZS().Suscribir_33ZS(this);
             this.FormClosed += (s, e) =>
                 SessionManager_33ZS.GetInstance_33ZS().Desuscribir_33ZS(this);
@@ -50,10 +52,15 @@ namespace TpIngSoftware
             aplicarBTN.Text = idm.Traducir_33ZS("Bitacora.Aplicar");
             imprimirBTN.Text = idm.Traducir_33ZS("Bitacora.Imprimir");
             salirBTN.Text = idm.Traducir_33ZS("Bitacora.Salir");
+            ConfigurarColumnas_33ZS();
         }
 
         private void BitacoraEventos33ZS_Load(object sender, EventArgs e)
         {
+            if (LicenseManager.UsageMode == LicenseUsageMode.Designtime)
+                return;
+            bitacoraBLL = new BitacoraEventoBLL_33ZS();
+            usuarioBLL = new UsuarioBLL_33ZS();
             CargarCombos_33ZS();
 
             CargarGrillaEventos_33ZS();
@@ -182,6 +189,28 @@ namespace TpIngSoftware
         {
             if (eventosDGV.Columns["Id_Evento_33ZS"] != null)
                 eventosDGV.Columns["Id_Evento_33ZS"].Visible = false;
+            ConfigurarColumnas_33ZS();
+        }
+
+        private void ConfigurarColumnas_33ZS()
+        {
+            var idioma = SessionManager_33ZS.GetInstance_33ZS();
+            var encabezados = new Dictionary<string, string>
+            {
+                { "Login_33ZS", "Bitacora.Login" },
+                { "Fecha_33ZS", "Bitacora.Fecha" },
+                { "Hora_33ZS", "Bitacora.Hora" },
+                { "Modulo_33ZS", "Bitacora.Modulo" },
+                { "NombreEvento_33ZS", "Bitacora.Evento" },
+                { "Criticidad_33ZS", "Bitacora.Criticidad" }
+            };
+            foreach (var par in encabezados)
+                if (eventosDGV.Columns[par.Key] != null)
+                    eventosDGV.Columns[par.Key].HeaderText = idioma.Traducir_33ZS(par.Value);
+            if (eventosDGV.Columns["Fecha_33ZS"] != null)
+                eventosDGV.Columns["Fecha_33ZS"].DefaultCellStyle.Format = "dd/MM/yyyy";
+            if (eventosDGV.Columns["Hora_33ZS"] != null)
+                eventosDGV.Columns["Hora_33ZS"].DefaultCellStyle.Format = "HH:mm";
         }
 
         private void eventosDGV_CellClick(object sender, DataGridViewCellEventArgs e)

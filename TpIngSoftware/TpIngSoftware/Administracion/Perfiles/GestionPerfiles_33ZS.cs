@@ -3,6 +3,7 @@ using Servicios;
 using Servicios.Composite;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Drawing;
 using System.Windows.Forms;
 using TpIngSoftware.Administracion.Perfiles;
@@ -20,12 +21,10 @@ namespace TpIngSoftware
         public GestionPerfiles_33ZS()
         {
             InitializeComponent();
-            ConfigurarIconosArbol_33ZS();
-            ConfigurarFiltroInicial_33ZS();
-            InicializarEventos();
-            CargarDatosDB();
-            AplicarPermisos_33ZS();
+            AplicarDiseno_33ZS();
 
+            if (LicenseManager.UsageMode == LicenseUsageMode.Designtime)
+                return;
             SessionManager_33ZS.GetInstance_33ZS().Suscribir_33ZS(this);
             this.FormClosed += (s, e) =>
                 SessionManager_33ZS.GetInstance_33ZS().Desuscribir_33ZS(this);
@@ -38,6 +37,8 @@ namespace TpIngSoftware
             var idm = SessionManager_33ZS.GetInstance_33ZS();
 
             this.Text = idm.Traducir_33ZS("GestionPerfiles.Titulo");
+            if (tituloVista_33ZS != null)
+                tituloVista_33ZS.Text = this.Text;
             bigLabel5.Text = idm.Traducir_33ZS("GestionPerfiles.Crear");
             bigLabel1.Text = idm.Traducir_33ZS("GestionPerfiles.Nombre");
             bigLabel2.Text = idm.Traducir_33ZS("GestionPerfiles.FamiliaRolCrear");
@@ -552,7 +553,13 @@ namespace TpIngSoftware
 
         private void GestionPerfiles_33ZS_Load(object sender, EventArgs e)
         {
-
+            if (LicenseManager.UsageMode == LicenseUsageMode.Designtime)
+                return;
+            ConfigurarIconosArbol_33ZS();
+            ConfigurarFiltroInicial_33ZS();
+            InicializarEventos();
+            CargarDatosDB();
+            AplicarPermisos_33ZS();
         }
 
         private void button1_Click(object sender, EventArgs e)
