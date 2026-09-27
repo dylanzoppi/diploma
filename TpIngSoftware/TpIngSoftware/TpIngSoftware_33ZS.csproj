@@ -70,9 +70,12 @@
     <Compile Include="Principal\Form1.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="Principal\Form1.Designer.cs">
-      <DependentUpon>Form1.cs</DependentUpon>
-    </Compile>
+    <Compile Include="PN1\EstiloPN1_33ZS.cs" />
+    <Compile Include="PN1\ClientesForm_33ZS.cs" />
+    <Compile Include="PN1\BarberosForm_33ZS.cs" />
+    <Compile Include="PN1\CatalogoForm_33ZS.cs" />
+    <Compile Include="PN1\NuevaAtencionForm_33ZS.cs" />
+    <Compile Include="PN1\HistorialForm_33ZS.cs" />
     <Compile Include="Administracion\Perfiles\GestionPerfiles_33ZS.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -116,9 +119,6 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Acceso\CambiarClave33ZS.resx">
       <DependentUpon>CambiarClave33ZS.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Principal\Form1.resx">
-      <DependentUpon>Form1.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Administracion\Perfiles\GestionPerfiles_33ZS.resx">
       <DependentUpon>GestionPerfiles_33ZS.cs</DependentUpon>

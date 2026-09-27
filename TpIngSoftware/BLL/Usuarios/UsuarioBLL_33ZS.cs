@@ -31,6 +31,15 @@ namespace BLL
 
         private static readonly int MaxIntentosLogin_33ZS = LeerMaxIntentosLogin_33ZS();
 
+        private static void RestringirCuentaAdministrador_33ZS(string rol)
+        {
+            Usuario_33ZS actual = SessionManager_33ZS.HaySesionActiva_33ZS()
+                ? SessionManager_33ZS.GetInstance_33ZS().UsuarioActual_33ZS : null;
+            if (actual != null && actual.Rol_33ZS == "Dueño" &&
+                string.Equals(rol, "Administrador", StringComparison.OrdinalIgnoreCase))
+                throw new UnauthorizedAccessException("El dueño no puede administrar cuentas del sistema.");
+        }
+
         private static int LeerMaxIntentosLogin_33ZS()
         {
             int valor;
@@ -53,6 +62,7 @@ namespace BLL
         public void AgregarUsuario_33ZS(Usuario_33ZS nuevoUsuario)
         {
             ValidarDatosBasicos_33ZS(nuevoUsuario);
+            RestringirCuentaAdministrador_33ZS(nuevoUsuario.Rol_33ZS);
 
             List<Usuario_33ZS> usuariosActuales = ObtenerUsuarios_33ZS();
 
@@ -167,6 +177,9 @@ namespace BLL
             if (usuarioExistente == null)
                 throw new Exception("Usuario.DniNoExiste");
 
+            RestringirCuentaAdministrador_33ZS(usuarioExistente.Rol_33ZS);
+            RestringirCuentaAdministrador_33ZS(usuario.Rol_33ZS);
+
             List<Usuario_33ZS> usuariosActuales = ObtenerUsuarios_33ZS();
 
             bool emailUsadoPorOtro = usuariosActuales.Any(u =>
@@ -191,6 +204,8 @@ namespace BLL
             if (usuario == null)
                 throw new Exception("Usuario.SeleccionNoExiste");
 
+            RestringirCuentaAdministrador_33ZS(usuario.Rol_33ZS);
+
             if (!usuario.Bloqueo_33ZS)
                 throw new Exception("Usuario.SeleccionNoBloqueado");
 
@@ -208,6 +223,8 @@ namespace BLL
 
             if (usuario == null)
                 throw new Exception("Usuario.SeleccionNoExiste");
+
+            RestringirCuentaAdministrador_33ZS(usuario.Rol_33ZS);
 
             bool nuevoEstado = !usuario.Activo_33ZS;
 

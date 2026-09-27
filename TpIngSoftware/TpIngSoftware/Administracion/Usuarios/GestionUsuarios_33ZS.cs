@@ -120,8 +120,11 @@ namespace TpIngSoftware
             try
             {
                 rolBOX.Items.Clear();
+                bool esDueno = SessionManager_33ZS.HaySesionActiva_33ZS() &&
+                    SessionManager_33ZS.GetInstance_33ZS().UsuarioActual_33ZS.Rol_33ZS == "Dueño";
                 foreach (var rol in perfilBLL.ObtenerRoles_33ZS())
-                    rolBOX.Items.Add(rol.Nombre);
+                    if (!esDueno || rol.Nombre != "Administrador")
+                        rolBOX.Items.Add(rol.Nombre);
             }
             catch (Exception ex)
             {

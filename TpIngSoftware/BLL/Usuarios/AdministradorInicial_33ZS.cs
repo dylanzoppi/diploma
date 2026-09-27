@@ -62,10 +62,10 @@ namespace BLL
                     dni, apellidos, nombre, email, claveAdmin, "Administrador", email));
                 usuarios.AgregarUsuario_33ZS(new Usuario_33ZS(
                     "90000001", "Ejemplo", "Demo Uno", EmailDemoUno_33ZS,
-                    claveDemo, "Invitado", EmailDemoUno_33ZS));
+                    claveDemo, "Recepcionista", EmailDemoUno_33ZS));
                 usuarios.AgregarUsuario_33ZS(new Usuario_33ZS(
                     "90000002", "Ejemplo", "Demo Dos", EmailDemoDos_33ZS,
-                    claveDemo, "Invitado", EmailDemoDos_33ZS));
+                    claveDemo, "Barbero", EmailDemoDos_33ZS));
             });
         }
 

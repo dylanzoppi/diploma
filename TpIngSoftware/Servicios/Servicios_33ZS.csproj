@@ -64,6 +64,9 @@
     <EmbeddedResource Include="BaseDatos\Migraciones\002_ProcedimientosSeguridad.sql" />
     <EmbeddedResource Include="BaseDatos\Migraciones\003_IntegridadFamilias.sql" />
     <EmbeddedResource Include="BaseDatos\Migraciones\004_IntentosLogin.sql" />
+    <EmbeddedResource Include="BaseDatos\Migraciones\005_RolesPN1.sql" />
+    <EmbeddedResource Include="BaseDatos\Migraciones\006_DatosPN1.sql" />
+    <EmbeddedResource Include="BaseDatos\Migraciones\007_AtencionesPN1.sql" />
     <EmbeddedResource Include="BaseDatos\QueryCargarDatosIniciales.sql" />
   </ItemGroup>
   <ItemGroup>

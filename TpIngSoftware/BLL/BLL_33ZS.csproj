@@ -50,6 +50,8 @@
     <Compile Include="Perfiles\PerfilBLL_33ZS.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Usuarios\UsuarioBLL_33ZS.cs" />
+    <Compile Include="PN1\PN1BLL_33ZS.cs" />
+    <Compile Include="PN1\PN1Inicializacion_33ZS.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\BE\BE_33ZS.csproj">

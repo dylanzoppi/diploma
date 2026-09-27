@@ -1,6 +1,6 @@
 # Diploma
 
-Trabajo final de Ingeniería de Software. Aplicación de escritorio para administrar usuarios, perfiles y permisos, con mecanismos de seguridad, auditoría e integridad de datos.
+Trabajo final de Ingeniería de Software. Aplicación de escritorio para gestionar la atención presencial de una barbería, con usuarios, permisos, auditoría e integridad de datos.
 
 ## Funcionalidades
 
@@ -11,6 +11,11 @@ Trabajo final de Ingeniería de Software. Aplicación de escritorio para adminis
 - Verificación y reparación de integridad mediante dígitos verificadores.
 - Cambio de idioma con archivos de recursos en español e inglés.
 - Respaldo y restauración de la base de datos.
+- Puestos Dueño, Recepcionista y Barbero, cada uno con cuenta y patentes propias.
+- Identificación y alta de clientes, configuración de barberos y comisiones, catálogo, precios y stock.
+- Registro conjunto de atención, cobro, comisión y consumo de insumos. Historial propio del barbero y consulta de actividad para el dueño.
+
+El flujo es presencial. No hay turnos ni reservas. PN2 (compras y reposición de insumos) sigue pendiente.
 
 ## Arquitectura
 
@@ -41,7 +46,9 @@ TpIngSoftware/
 4. Restaurar paquetes NuGet si Visual Studio lo solicita y compilar la solución.
 5. Ejecutar el proyecto `TpIngSoftware`. Si la base no existe, la aplicación la crea; luego aplica las migraciones pendientes en orden.
 
-En una base nueva aparece una pantalla de configuración antes del inicio de sesión. Ingresá DNI, nombre, apellido, email y contraseña del administrador, y elegí otra contraseña para las dos cuentas de ejemplo `demo1@harlem.local` y `demo2@harlem.local` (rol `Invitado`). Ambas contraseñas deben tener entre 12 y 50 caracteres. Las tres altas se confirman juntas mediante BLL, mappers y SP, con PBKDF2, bitácora y DV. Si cancelás o falla una alta, no queda una cuenta parcial y podés repetir la configuración al volver a iniciar.
+En una base nueva aparece una pantalla de configuración antes del inicio de sesión. Ingresá DNI, nombre, apellido, email y contraseña del administrador, y elegí otra contraseña para las dos cuentas de ejemplo: `demo1@harlem.local` (Recepcionista) y `demo2@harlem.local` (Barbero). Ambas contraseñas deben tener entre 12 y 50 caracteres. Las tres altas se confirman juntas mediante BLL, mappers y SP, con PBKDF2, bitácora y DV. Si cancelás o falla una alta, no queda una cuenta parcial y podés repetir la configuración al volver a iniciar.
+
+Para usar PN1, iniciá sesión como Administrador. En **Catálogo y stock**, asigná precios a los servicios y stock inicial a los insumos con un motivo de ajuste. En **Barberos**, configurá la comisión y activá el perfil del usuario Barbero. Después podés ingresar como Recepcionista, buscar o registrar un cliente y cargar una atención con su cobro. El barbero ingresa con su cuenta para consultar sólo sus atenciones y comisiones. También podés crear usuarios con rol Dueño desde **Usuarios**; ese puesto gestiona la operación y las cuentas de trabajo, pero no administra perfiles ni cuentas de Administrador.
 
 Para una instalación automatizada se pueden proporcionar `TPINGSOFTWARE_ADMIN_DNI`, `TPINGSOFTWARE_ADMIN_NOMBRE`, `TPINGSOFTWARE_ADMIN_APELLIDOS`, `TPINGSOFTWARE_ADMIN_EMAIL`, `TPINGSOFTWARE_ADMIN_PASSWORD` y `TPINGSOFTWARE_DEMO_PASSWORD` en el entorno del proceso. Si falta alguna, se abre el formulario. Retirá las variables con contraseñas del entorno desde el que lanzaste la aplicación cuando termine la instalación. El repositorio incluye identidades de ejemplo, pero ninguna contraseña predeterminada.
 
@@ -59,6 +66,8 @@ La instancia y el nombre de base se configuran en `App.config`. Para pruebas o i
 
 El máximo de intentos de inicio de sesión (`MaxIntentosLogin`) y el costo de PBKDF2 (`PasswordHashIterations`) se configuran en `App.config`. Los intentos fallidos se guardan en `LoginIntento`, por lo que cerrar y abrir la aplicación no reinicia el contador. Un acceso correcto o el desbloqueo de la cuenta lo reinicia. Las contraseñas nuevas usan PBKDF2 con sal individual. Los hashes SHA-256 anteriores se verifican para conservar el acceso y se actualizan al primer inicio de sesión correcto.
 
-El esquema incluye las tablas `Usuario`, `Rol`, `Patente`, `Familia`, sus relaciones, `Evento`, `DV` y `LoginIntento`. Las operaciones ordinarias pasan por procedimientos almacenados de las migraciones `002_ProcedimientosSeguridad`, `003_IntegridadFamilias` y `004_IntentosLogin`; las escrituras de usuarios y perfiles, sus dígitos verificadores y sus eventos de bitácora se confirman conjuntamente. Respaldo, restauración y el registro de migraciones son operaciones de infraestructura que requieren comandos SQL desde DAL o el inicializador.
+El esquema incluye las tablas de seguridad `Usuario`, `Rol`, `Patente`, `Familia`, sus relaciones, `Evento`, `DV` y `LoginIntento`. PN1 añade `Cliente`, `BarberoPerfil`, `ServicioCatalogo`, `Insumo`, `ServicioConsumo`, `MedioPago`, `AjusteStock`, `Atencion`, `Cobro` y `ConsumoAtencion` mediante las migraciones `005` a `007`. La operación de atención usa un procedimiento almacenado transaccional con rollback, validaciones de permisos, precio y stock, y un identificador único que evita duplicar una operación al reintentarla. Los precios, comisiones y existencias se configuran en la base; los valores de ejemplo del catálogo se crean sólo durante la migración.
+
+Las operaciones ordinarias de seguridad pasan por procedimientos almacenados de las migraciones `002_ProcedimientosSeguridad`, `003_IntegridadFamilias` y `004_IntentosLogin`; las escrituras de usuarios y perfiles, sus dígitos verificadores y sus eventos de bitácora se confirman conjuntamente. Respaldo, restauración y el registro de migraciones son operaciones de infraestructura que requieren comandos SQL desde DAL o el inicializador.
 
 Si LocalDB informa que la instancia está detenida mientras SQL Server Management Studio mantiene una conexión activa, la cadena por alias puede fallar. Guardá y cerrá SSMS antes de reiniciar LocalDB; luego verificá la conexión con `(localdb)\MSSQLLocalDB`. No fijes en el repositorio un nombre de canalización `LOCALDB#...`, porque cambia al reiniciar la instancia. La variable `TPINGSOFTWARE_CONNECTION_STRING` permite apuntar temporalmente a la conexión activa durante el diagnóstico.

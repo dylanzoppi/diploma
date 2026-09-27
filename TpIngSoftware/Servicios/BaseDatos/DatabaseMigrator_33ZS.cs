@@ -14,7 +14,10 @@ namespace Servicios
             new Migracion_33ZS("001_AlinearSeguridad", "001_AlinearSeguridad.sql"),
             new Migracion_33ZS("002_ProcedimientosSeguridad", "002_ProcedimientosSeguridad.sql"),
             new Migracion_33ZS("003_IntegridadFamilias", "003_IntegridadFamilias.sql"),
-            new Migracion_33ZS("004_IntentosLogin", "004_IntentosLogin.sql")
+            new Migracion_33ZS("004_IntentosLogin", "004_IntentosLogin.sql"),
+            new Migracion_33ZS("005_RolesPN1", "005_RolesPN1.sql"),
+            new Migracion_33ZS("006_DatosPN1", "006_DatosPN1.sql"),
+            new Migracion_33ZS("007_AtencionesPN1", "007_AtencionesPN1.sql")
         };
 
         public static void AplicarMigraciones_33ZS()
@@ -48,7 +51,9 @@ namespace Servicios
                         }
                         catch
                         {
-                            transaccion.Rollback();
+                            try { transaccion.Rollback(); }
+                            catch (InvalidOperationException) { /* SQL Server ya revirtió la transacción. */ }
+                            catch (SqlException) { /* Se conserva el error original de la migración. */ }
                             throw;
                         }
                     }

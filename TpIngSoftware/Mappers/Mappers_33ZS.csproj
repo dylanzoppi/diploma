@@ -46,8 +46,13 @@
     <Compile Include="Security\BitacoraEventoMapper_33ZS.cs" />
     <Compile Include="Security\PerfilMapper_33ZS.cs" />
     <Compile Include="Security\UsuarioMapper_33ZS.cs" />
+    <Compile Include="PN1\PN1Mapper_33ZS.cs" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\BE\BE_33ZS.csproj">
+      <Project>{80440eff-c396-4e3f-ad66-cdca92e180bb}</Project>
+      <Name>BE_33ZS</Name>
+    </ProjectReference>
     <ProjectReference Include="..\DAL\DAL_33ZS.csproj">
       <Project>{7055e110-e309-4b4c-8340-a5b50f3315a4}</Project>
       <Name>DAL_33ZS</Name>

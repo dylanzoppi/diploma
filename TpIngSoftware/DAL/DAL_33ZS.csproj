@@ -50,6 +50,7 @@
     <Compile Include="Security\PerfilDataAccess_33ZS.cs" />
     <Compile Include="Security\EventoDataAccess_33ZS.cs" />
     <Compile Include="Integrity\DigitoVerificadorDataAccess_33ZS.cs" />
+    <Compile Include="PN1\PN1DataAccess_33ZS.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

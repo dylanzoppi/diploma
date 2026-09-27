@@ -41,7 +41,7 @@ namespace TpIngSoftware
             var descripcion = new Label
             {
                 Text = "Creá el administrador para esta instalación. También se crearán dos " +
-                       "cuentas Invitado de ejemplo. Elegí sus contraseñas antes de continuar.",
+                       "cuentas de ejemplo: una Recepcionista y un Barbero. Elegí sus contraseñas antes de continuar.",
                 AutoSize = true,
                 MaximumSize = new Size(565, 0),
                 Margin = new Padding(0, 0, 0, 14)
@@ -61,8 +61,8 @@ namespace TpIngSoftware
             var cuentasDemo = new Label
             {
                 Text = "Cuentas de ejemplo: " + AdministradorInicial_33ZS.EmailDemoUno_33ZS +
-                       " y " + AdministradorInicial_33ZS.EmailDemoDos_33ZS +
-                       ". Ambas usarán la clave demo que ingreses. Cada clave debe tener de 12 a 50 caracteres.",
+                       " (Recepcionista) y " + AdministradorInicial_33ZS.EmailDemoDos_33ZS +
+                       " (Barbero). Ambas usarán la clave demo que ingreses. Cada clave debe tener de 12 a 50 caracteres.",
                 AutoSize = true,
                 MaximumSize = new Size(565, 0),
                 Margin = new Padding(0, 10, 0, 10)

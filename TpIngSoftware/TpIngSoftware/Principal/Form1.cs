@@ -1,214 +1,210 @@
-﻿using BLL;
-using Servicios;
 using System;
+using System.Drawing;
+using System.Globalization;
 using System.Windows.Forms;
-using ReaLTaiizor.Forms; 
+using BLL;
+using BLL.PN1;
+using Servicios;
+using TpIngSoftware.PN1;
 
 namespace TpIngSoftware
 {
-
-    public partial class Form1 : CrownForm, IObservador_33ZS
+    public sealed class Form1 : Form
     {
-        private readonly BitacoraEventoBLL_33ZS bitacoraBLL = new BitacoraEventoBLL_33ZS();
+        private readonly PN1BLL_33ZS negocio = new PN1BLL_33ZS();
+        private readonly FlowLayoutPanel navegacion = new FlowLayoutPanel();
+        private readonly FlowLayoutPanel accesos = new FlowLayoutPanel();
+        private readonly Label titulo = new Label();
+        private readonly Label subtitulo = new Label();
+        private readonly Label accesosTitulo = new Label();
+        private Button claveBoton;
+        private Button salirBoton;
 
-        private readonly PerfilBLL_33ZS perfilBLL = new PerfilBLL_33ZS();
-        private readonly UsuarioBLL_33ZS usuarioBLL = new UsuarioBLL_33ZS();
- 
+        private static string T(string espanol, string ingles) => EstiloPN1_33ZS.T(espanol, ingles);
+
         public Form1()
         {
-            InitializeComponent();        
+            Text = "Harlem · Gestión de barbería";
+            StartPosition = FormStartPosition.CenterScreen;
+            MinimumSize = new Size(970, 620);
+            Size = new Size(1200, 750);
+            BackColor = EstiloPN1_33ZS.Fondo;
+            Font = new Font("Segoe UI", 10);
 
-            SessionManager_33ZS.GetInstance_33ZS().Suscribir_33ZS(this);
-            this.FormClosed += (s, e) =>
-                SessionManager_33ZS.GetInstance_33ZS().Desuscribir_33ZS(this);
+            var lateral = new TableLayoutPanel { Dock = DockStyle.Left, Width = 245,
+                ColumnCount = 1, RowCount = 3,
+                BackColor = EstiloPN1_33ZS.Tinta, Padding = new Padding(18, 24, 18, 18) };
+            lateral.RowStyles.Add(new RowStyle(SizeType.Absolute, 62));
+            lateral.RowStyles.Add(new RowStyle(SizeType.Percent, 100));
+            lateral.RowStyles.Add(new RowStyle(SizeType.Absolute, 106));
+            Controls.Add(lateral);
+            navegacion.Dock = DockStyle.Fill;
+            navegacion.FlowDirection = FlowDirection.TopDown;
+            navegacion.WrapContents = false;
+            navegacion.AutoScroll = true;
+            lateral.Controls.Add(navegacion, 0, 1);
+            var marca = new Label { Dock = DockStyle.Top, Height = 62, Text = "HARLEM",
+                Font = new Font("Segoe UI Semibold", 23), ForeColor = Color.White };
+            lateral.Controls.Add(marca, 0, 0);
+            var pie = new Panel { Dock = DockStyle.Bottom, Height = 150,
+                BackColor = EstiloPN1_33ZS.Tinta };
+            lateral.Controls.Add(pie, 0, 2);
+            lateral.RowStyles[2].Height = 150;
+            var idioma = BotonLateral("Español / English", CambiarIdioma);
+            pie.Controls.Add(idioma);
+            idioma.Dock = DockStyle.Top;
+            claveBoton = BotonLateral("Cambiar contraseña", () => Abrir(new CambiarClave33ZS()));
+            pie.Controls.Add(claveBoton);
+            claveBoton.Dock = DockStyle.Top;
+            salirBoton = BotonLateral("Cerrar sesión", CerrarSesion);
+            pie.Controls.Add(salirBoton);
+            salirBoton.Dock = DockStyle.Bottom;
 
-            Actualizar_33ZS();
+            var cuerpo = new TableLayoutPanel { Dock = DockStyle.Fill, Padding = new Padding(38),
+                ColumnCount = 1, RowCount = 4 };
+            cuerpo.RowStyles.Add(new RowStyle(SizeType.AutoSize));
+            cuerpo.RowStyles.Add(new RowStyle(SizeType.AutoSize));
+            cuerpo.RowStyles.Add(new RowStyle(SizeType.AutoSize));
+            cuerpo.RowStyles.Add(new RowStyle(SizeType.Percent, 100));
+            Controls.Add(cuerpo);
+            cuerpo.BringToFront();
+            titulo.AutoSize = true;
+            titulo.Font = new Font("Segoe UI Semibold", 27);
+            titulo.ForeColor = EstiloPN1_33ZS.Tinta;
+            cuerpo.Controls.Add(titulo, 0, 0);
+            subtitulo.AutoSize = true;
+            subtitulo.ForeColor = Color.FromArgb(95, 99, 98);
+            subtitulo.Margin = new Padding(0, 2, 0, 30);
+            cuerpo.Controls.Add(subtitulo, 0, 1);
+            accesosTitulo.Text = "ACCESOS DISPONIBLES";
+            accesosTitulo.AutoSize = true;
+            accesosTitulo.Font = new Font("Segoe UI Semibold", 10);
+            accesosTitulo.ForeColor = EstiloPN1_33ZS.Acento;
+            accesosTitulo.Margin = new Padding(0, 0, 0, 14);
+            cuerpo.Controls.Add(accesosTitulo, 0, 2);
+            accesos.Dock = DockStyle.Fill;
+            accesos.AutoScroll = true;
+            cuerpo.Controls.Add(accesos, 0, 3);
+
+            Load += (s, e) => Configurar();
+            FormClosed += (s, e) =>
+            {
+                if (SessionManager_33ZS.HaySesionActiva_33ZS())
+                    try { new UsuarioBLL_33ZS().Logout_33ZS(); }
+                    catch { SessionManager_33ZS.Logout_33ZS(); }
+            };
         }
 
-        public void Actualizar_33ZS()
+        private static Button BotonLateral(string texto, Action accion)
         {
-            var idm = SessionManager_33ZS.GetInstance_33ZS();
-
-            this.Text = idm.Traducir_33ZS("Form1.Titulo");
-
-            usuario33ZSToolStripMenuItem3.Text = idm.Traducir_33ZS("Menu.Usuario");
-            admin33ZSToolStripMenuItem2.Text = idm.Traducir_33ZS("Menu.Admin");
-            maestros33ZSToolStripMenuItem1.Text = idm.Traducir_33ZS("Menu.Maestros");
-            ventas33ZSToolStripMenuItem1.Text = idm.Traducir_33ZS("Menu.Ventas");
-            compras33ZSToolStripMenuItem1.Text = idm.Traducir_33ZS("Menu.Compras");
-            reportes33ZSToolStripMenuItem1.Text = idm.Traducir_33ZS("Menu.Reportes");
-            ayuda33ZSToolStripMenuItem1.Text = idm.Traducir_33ZS("Menu.Ayuda");
-
-            iniciarSesionToolStripMenuItem.Text = idm.Traducir_33ZS("Menu.IniciarSesion");
-            cambiarClaveToolStripMenuItem.Text = idm.Traducir_33ZS("Menu.CambiarClave");
-            cambiarIdiomaToolStripMenuItem.Text = idm.Traducir_33ZS("Menu.CambiarIdioma");
-            cerrarSesionToolStripMenuItem.Text = idm.Traducir_33ZS("Menu.CerrarSesion");
-            españolToolStripMenuItem.Text = idm.Traducir_33ZS("Idioma.Espanol");
-            inglesToolStripMenuItem.Text = idm.Traducir_33ZS("Idioma.Ingles");
-           
-            usuariosToolStripMenuItem.Text = idm.Traducir_33ZS("Menu.Usuarios");
-            perfilesToolStripMenuItem.Text = idm.Traducir_33ZS("Menu.Perfiles");
-            backupToolStripMenuItem.Text = idm.Traducir_33ZS("Menu.Backup");
-            restoreToolStripMenuItem.Text = idm.Traducir_33ZS("Menu.Restore");
-            bitacoraEToolStripMenuItem.Text = idm.Traducir_33ZS("Menu.BitacoraEventos");
-
-            productosToolStripMenuItem.Text = idm.Traducir_33ZS("Menu.Productos");
-            clienteToolStripMenuItem.Text = idm.Traducir_33ZS("Menu.Clientes");
-            proveedoresToolStripMenuItem.Text = idm.Traducir_33ZS("Menu.Proveedores");
-            bitacoraToolStripMenuItem.Text = idm.Traducir_33ZS("Menu.Bitacora");
-
-            carritoToolStripMenuItem.Text = idm.Traducir_33ZS("Menu.Carrito");
-            facturarToolStripMenuItem.Text = idm.Traducir_33ZS("Menu.Facturar");
-
-            generarOrdenDeCompraToolStripMenuItem.Text = idm.Traducir_33ZS("Menu.GenerarOrden");
-            recepcionProductosToolStripMenuItem.Text = idm.Traducir_33ZS("Menu.Recepcion");
-
-            rep1ToolStripMenuItem.Text = idm.Traducir_33ZS("Menu.Rep1");
-            rep2ToolStripMenuItem.Text = idm.Traducir_33ZS("Menu.Rep2");
-            rep3ToolStripMenuItem.Text = idm.Traducir_33ZS("Menu.Rep3");
+            var boton = new Button { Text = texto, Width = 175, Height = 45,
+                FlatStyle = FlatStyle.Flat, BackColor = EstiloPN1_33ZS.Tinta,
+                ForeColor = Color.White, TextAlign = ContentAlignment.MiddleLeft,
+                Cursor = Cursors.Hand };
+            boton.FlatAppearance.BorderSize = 0;
+            boton.Click += (s, e) => accion();
+            return boton;
         }
 
-        private void menuStrip1_ItemClicked(object sender, ToolStripItemClickedEventArgs e)
+        private void Agregar(string texto, string descripcion, Action accion)
         {
-
+            navegacion.Controls.Add(BotonLateral(texto, accion));
+            var tarjeta = new Button { Text = texto + Environment.NewLine + descripcion,
+                Width = 255, Height = 115, Margin = new Padding(0, 0, 18, 18),
+                FlatStyle = FlatStyle.Flat, BackColor = Color.White,
+                ForeColor = EstiloPN1_33ZS.Tinta, TextAlign = ContentAlignment.MiddleLeft,
+                Padding = new Padding(16), Cursor = Cursors.Hand };
+            tarjeta.FlatAppearance.BorderColor = Color.FromArgb(222, 216, 209);
+            tarjeta.Click += (s, e) => accion();
+            accesos.Controls.Add(tarjeta);
         }
 
-        private void Form1_Load(object sender, EventArgs e)
+        private bool TienePatente(string patente)
         {
-            ConfigurarAccesosPorRol_33ZS();
+            var usuario = SessionManager_33ZS.GetInstance_33ZS().UsuarioActual_33ZS;
+            return usuario != null && usuario.Activo_33ZS && !usuario.Bloqueo_33ZS &&
+                new PerfilBLL_33ZS().RolTienePatente_33ZS(usuario.Rol_33ZS, patente);
         }
 
-        private void ConfigurarAccesosPorRol_33ZS()
+        private void AgregarConPatente(string texto, string descripcion, string patente, Action accion)
         {
-            string rol = SessionManager_33ZS.HaySesionActiva_33ZS()
-                ? SessionManager_33ZS.GetInstance_33ZS().UsuarioActual_33ZS.Rol_33ZS
-                : null;
-
-            var patentes = perfilBLL.ObtenerPatentesDeRol_33ZS(rol);
-
-            bool puedeUsuarios = patentes.Contains("AltaUsuario")
-                || patentes.Contains("BajaUsuario")
-                || patentes.Contains("ModificacionUsuario")
-                || patentes.Contains("DesbloquearUsuario");
-
-            usuariosToolStripMenuItem.Enabled = puedeUsuarios;
-            usuariosToolStripMenuItem.Visible = puedeUsuarios;
-
-
-            bool puedePerfiles = patentes.Contains("AltaPerfil")
-                || patentes.Contains("BajaPerfil")
-                || patentes.Contains("ModificacionPerfil");
-
-            perfilesToolStripMenuItem.Enabled = puedePerfiles;
-            perfilesToolStripMenuItem.Visible = puedePerfiles;
-
-            bool puedeBitacora = patentes.Contains("ConsultarBitacora");
-            bitacoraEToolStripMenuItem.Enabled = puedeBitacora;
-            bitacoraEToolStripMenuItem.Visible = puedeBitacora;
-
-            bool puedeRespaldos = patentes.Contains("GestionRespaldos");
-            backupToolStripMenuItem.Enabled = puedeRespaldos;
-            backupToolStripMenuItem.Visible = puedeRespaldos;
-            restoreToolStripMenuItem.Enabled = puedeRespaldos;
-            restoreToolStripMenuItem.Visible = puedeRespaldos;
+            if (TienePatente(patente)) Agregar(texto, descripcion, accion);
         }
 
-        private void backupToolStripMenuItem_Click(object sender, EventArgs e)
+        private void Configurar()
         {
-            Respaldo_33ZS respaldo = new Respaldo_33ZS();
-            this.Hide();
-            respaldo.ShowDialog();
-            this.Show();
+            var usuario = SessionManager_33ZS.GetInstance_33ZS().UsuarioActual_33ZS;
+            if (usuario == null) { Close(); return; }
+            bool ingles = SessionManager_33ZS.GetInstance_33ZS().GetIdiomaActual_33ZS() == "ENG";
+            Text = ingles ? "Harlem · Barbershop management" : "Harlem · Gestión de barbería";
+            titulo.Text = (ingles ? "Hello, " : "Hola, ") + usuario.Nombre_33ZS;
+            subtitulo.Text = RolTexto(usuario.Rol_33ZS, ingles) + " · " + DateTime.Today.ToString("D",
+                CultureInfo.GetCultureInfo(ingles ? "en-US" : "es-AR"));
+            accesosTitulo.Text = T("ACCESOS DISPONIBLES", "AVAILABLE ACTIONS");
+            claveBoton.Text = T("Cambiar contraseña", "Change password");
+            salirBoton.Text = T("Cerrar sesión", "Sign out");
+            navegacion.Controls.Clear();
+            accesos.Controls.Clear();
+            AgregarConPatente(T("Nueva atención", "New service"), T("Registrar servicio y cobro", "Record service and payment"), "RegistrarAtencion",
+                () => Abrir(new NuevaAtencionForm_33ZS()));
+            AgregarConPatente(T("Clientes", "Customers"), T("Buscar y registrar clientes", "Find and register customers"), "BuscarCliente",
+                () => Abrir(new ClientesForm_33ZS()));
+            if (usuario.Rol_33ZS == "Barbero")
+                AgregarConPatente(T("Mi historial", "My history"), T("Ver mis servicios y comisiones", "View my services and commissions"), "ConsultarAtencionesPropias",
+                    () => Abrir(new HistorialForm_33ZS(false)));
+            AgregarConPatente(T("Atenciones", "Services"), T("Consultar actividad del negocio", "View shop activity"), "ConsultarAtencionesGenerales",
+                () => Abrir(new HistorialForm_33ZS(true)));
+            AgregarConPatente(T("Barberos", "Barbers"), T("Configurar comisión y disponibilidad", "Set commission and availability"), "GestionarBarberos",
+                () => Abrir(new BarberosForm_33ZS()));
+            AgregarConPatente(T("Catálogo y stock", "Services and stock"), T("Precios, insumos y existencias", "Prices, supplies and stock"), "GestionarCatalogo",
+                () => Abrir(new CatalogoForm_33ZS()));
+            if (TienePatente("AltaUsuario") || TienePatente("ModificacionUsuario"))
+                Agregar(T("Usuarios", "Users"), T("Cuentas y roles", "Accounts and roles"), () => Abrir(new GestionUsuarios_33ZS()));
+            if (TienePatente("AltaPerfil") || TienePatente("ModificacionPerfil"))
+                Agregar(T("Perfiles", "Profiles"), T("Patentes y permisos", "Permissions"), () => Abrir(new GestionPerfiles_33ZS()));
+            AgregarConPatente(T("Bitácora", "Event log"), T("Eventos de seguridad", "Security events"), "ConsultarBitacora",
+                () => Abrir(new BitacoraEventos33ZS()));
+            AgregarConPatente(T("Respaldos", "Backups"), T("Copia y restauración", "Backup and restore"), "GestionRespaldos",
+                () => Abrir(new Respaldo_33ZS()));
+            if (accesos.Controls.Count == 0)
+                accesos.Controls.Add(new Label { Text = T("Este rol no tiene acciones disponibles.", "This role has no available actions."), AutoSize = true });
         }
 
-        private void restoreToolStripMenuItem_Click(object sender, EventArgs e)
+        private void Abrir(Form ventana)
         {
-            Respaldo_33ZS respaldo = new Respaldo_33ZS();
-            this.Hide();
-            respaldo.ShowDialog();
-            this.Show();
+            using (ventana) ventana.ShowDialog(this);
+            Configurar();
         }
 
-        private void uToolStripMenuItem_Click(object sender, EventArgs e)
+        private void CerrarSesion()
         {
-            Login33ZS login = new Login33ZS(false, false);
-            login.ShowDialog();
+            try { new UsuarioBLL_33ZS().Logout_33ZS(); Close(); }
+            catch (Exception ex) { EstiloPN1_33ZS.Error(this, ex); }
         }
 
-        private void maestrosToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-
-        }
-
-        private void ventaToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-
-        }
-
-        private void usuariosToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            GestionUsuarios_33ZS gestionUsuarios = new GestionUsuarios_33ZS();
-            this.Hide();
-            gestionUsuarios.ShowDialog();
-            this.Show();
-        }
-
-        private void cerrarSesionToolStripMenuItem1_Click(object sender, EventArgs e)
+        private void CambiarIdioma()
         {
             try
             {
-                UsuarioBLL_33ZS usuarioBLL = new UsuarioBLL_33ZS();
-                usuarioBLL.Logout_33ZS();
-
-                this.Close();
+                var sesion = SessionManager_33ZS.GetInstance_33ZS();
+                new UsuarioBLL_33ZS().CambiarIdioma_33ZS(
+                    sesion.GetIdiomaActual_33ZS() == "ESP" ? "ENG" : "ESP");
+                Configurar();
             }
-            catch (Exception ex)
+            catch (Exception ex) { EstiloPN1_33ZS.Error(this, ex); }
+        }
+
+        private static string RolTexto(string rol, bool ingles)
+        {
+            if (!ingles) return rol;
+            switch (rol)
             {
-                var idm = SessionManager_33ZS.GetInstance_33ZS();
-                MessageBox.Show(idm.Traducir_33ZS("Form1.ErrorCerrarSesion") + " " + idm.Traducir_33ZS(ex.Message));
+                case "Barbero": return "Barber";
+                case "Recepcionista": return "Receptionist";
+                case "Dueño": return "Owner";
+                case "Administrador": return "Administrator";
+                default: return rol;
             }
-        }
-
-        private void cambiarClaveToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            CambiarClave33ZS cambiarClave = new CambiarClave33ZS();
-            cambiarClave.ShowDialog(this);
-        }
-
-        private void bitacoraEToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            BitacoraEventos33ZS bitacoraEventos33ZS = new BitacoraEventos33ZS();
-            this.Hide();
-            bitacoraEventos33ZS.ShowDialog();
-            this.Show();
-        }
-
-        private void menuStrip2_ItemClicked(object sender, ToolStripItemClickedEventArgs e)
-        {
-
-        }
-
-        private void asdToolStripMenuItem5_Click(object sender, EventArgs e)
-        {
-
-        }
-
-        private void perfilesToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            GestionPerfiles_33ZS gestionPerfiles = new GestionPerfiles_33ZS();
-            this.Hide();
-            gestionPerfiles.ShowDialog();
-            this.Show();
-        }
-
-        private void españolToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            usuarioBLL.CambiarIdioma_33ZS("ESP");
-        }
-
-        private void inglesToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            usuarioBLL.CambiarIdioma_33ZS("ENG");
         }
     }
 }

@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using BLL;
+using BLL.PN1;
 using Servicios;
 
 namespace TpIngSoftware
@@ -24,6 +25,7 @@ namespace TpIngSoftware
                 DatabaseInitializer_33ZS.AsegurarBaseDeDatos_33ZS();
 
                 DatabaseMigrator_33ZS.AplicarMigraciones_33ZS();
+                PN1Inicializacion_33ZS.CompletarMigracion_33ZS();
 
                 if (AdministradorInicial_33ZS.RequiereConfiguracion_33ZS() &&
                     !AdministradorInicial_33ZS.CrearDesdeEntorno_33ZS())
