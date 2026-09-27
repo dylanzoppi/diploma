@@ -33,6 +33,7 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
+    <Reference Include="System.Configuration" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
@@ -43,8 +44,8 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="BackupBLL_33ZS.cs" />
+    <Compile Include="AdministradorInicial_33ZS.cs" />
     <Compile Include="BitacoraEventoBLL_33ZS.cs" />
-    <Compile Include="Class1.cs" />
     <Compile Include="DigitoVerificadorBLL_33ZS.cs" />
     <Compile Include="PerfilBLL_33ZS.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -55,9 +56,9 @@
       <Project>{80440eff-c396-4e3f-ad66-cdca92e180bb}</Project>
       <Name>BE_33ZS</Name>
     </ProjectReference>
-    <ProjectReference Include="..\DAL\DAL_33ZS.csproj">
-      <Project>{7055e110-e309-4b4c-8340-a5b50f3315a4}</Project>
-      <Name>DAL_33ZS</Name>
+    <ProjectReference Include="..\Mappers\Mappers_33ZS.csproj">
+      <Project>{A9D5D85C-48B0-4C4B-99BC-48ECAD5F657E}</Project>
+      <Name>Mappers_33ZS</Name>
     </ProjectReference>
     <ProjectReference Include="..\Servicios\Servicios_33ZS.csproj">
       <Project>{fb9073e5-47b5-48dd-b256-16bf1fdf8271}</Project>

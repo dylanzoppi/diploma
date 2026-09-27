@@ -58,28 +58,10 @@ INSERT INTO Rol_Patente (RolID, PatenteID)
 SELECT 2, ID FROM Patente WHERE Nombre = 'CambiarClave';
 GO
 
-/* ---------- 5. Usuarios --------- */
+/* Los usuarios se crean después de las migraciones mediante el alta normal.
+   No se incluyen contraseñas conocidas en el repositorio. */
 
--- Admin:  email = admin@admin.com   |  password = Admin123
-INSERT INTO Usuario (DNI, Apellidos, Nombre, Login, Password, Rol, Email, Bloqueo, Activo, Idioma)
-VALUES (
-  '10000000', 'Administrador', 'Admin',
-  'admin@admin.com',
-  LOWER(CONVERT(varchar(64), HASHBYTES('SHA2_256', CONVERT(varbinary(255), 'Admin123')), 2)),
-  'Administrador', 'admin@admin.com', 0, 1, 'ESP'
-);
-
--- Invitado:  email = invitado@invitado.com  |  password = Invitado123
-INSERT INTO Usuario (DNI, Apellidos, Nombre, Login, Password, Rol, Email, Bloqueo, Activo, Idioma)
-VALUES (
-  '20000000', 'Invitado', 'Invitado',
-  'invitado@invitado.com',
-  LOWER(CONVERT(varchar(64), HASHBYTES('SHA2_256', CONVERT(varbinary(255), 'Invitado123')), 2)),
-  'Invitado', 'invitado@invitado.com', 0, 1, 'ESP'
-);
-GO
-
-/* ---------- 6. Verificación ---------- */
+/* ---------- 5. Verificación ---------- */
 SELECT 'Patentes' AS Tabla, COUNT(*) AS Filas FROM Patente
 UNION ALL SELECT 'Familias', COUNT(*) FROM Familia
 UNION ALL SELECT 'Roles', COUNT(*) FROM Rol

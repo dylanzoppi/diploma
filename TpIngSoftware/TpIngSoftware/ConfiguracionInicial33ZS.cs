@@ -1,0 +1,134 @@
+using System;
+using System.Drawing;
+using System.Windows.Forms;
+using BLL;
+
+namespace TpIngSoftware
+{
+    internal sealed class ConfiguracionInicial33ZS : Form
+    {
+        private readonly TextBox dni = new TextBox();
+        private readonly TextBox nombre = new TextBox();
+        private readonly TextBox apellidos = new TextBox();
+        private readonly TextBox email = new TextBox();
+        private readonly TextBox claveAdmin = new TextBox();
+        private readonly TextBox claveDemo = new TextBox();
+        private readonly Label error = new Label();
+
+        public ConfiguracionInicial33ZS()
+        {
+            Text = "Configuración inicial de Harlem";
+            Width = 640;
+            Height = 470;
+            StartPosition = FormStartPosition.CenterScreen;
+            FormBorderStyle = FormBorderStyle.FixedDialog;
+            MaximizeBox = false;
+            MinimizeBox = false;
+
+            var tabla = new TableLayoutPanel
+            {
+                Dock = DockStyle.Fill,
+                Padding = new Padding(22),
+                ColumnCount = 2,
+                RowCount = 10
+            };
+            tabla.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 200));
+            tabla.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100));
+            for (int i = 0; i < tabla.RowCount; i++)
+                tabla.RowStyles.Add(new RowStyle(SizeType.AutoSize));
+            Controls.Add(tabla);
+
+            var descripcion = new Label
+            {
+                Text = "Creá el administrador para esta instalación. También se crearán dos " +
+                       "cuentas Invitado de ejemplo. Elegí sus contraseñas antes de continuar.",
+                AutoSize = true,
+                MaximumSize = new Size(565, 0),
+                Margin = new Padding(0, 0, 0, 14)
+            };
+            tabla.Controls.Add(descripcion, 0, 0);
+            tabla.SetColumnSpan(descripcion, 2);
+
+            AgregarCampo_33ZS(tabla, "DNI del administrador", dni, 1);
+            AgregarCampo_33ZS(tabla, "Nombre", nombre, 2);
+            AgregarCampo_33ZS(tabla, "Apellido", apellidos, 3);
+            AgregarCampo_33ZS(tabla, "Email / usuario", email, 4);
+            AgregarCampo_33ZS(tabla, "Clave del administrador", claveAdmin, 5);
+            AgregarCampo_33ZS(tabla, "Clave de las cuentas demo", claveDemo, 6);
+            claveAdmin.UseSystemPasswordChar = true;
+            claveDemo.UseSystemPasswordChar = true;
+
+            var cuentasDemo = new Label
+            {
+                Text = "Cuentas de ejemplo: " + AdministradorInicial_33ZS.EmailDemoUno_33ZS +
+                       " y " + AdministradorInicial_33ZS.EmailDemoDos_33ZS +
+                       ". Ambas usarán la clave demo que ingreses. Cada clave debe tener de 12 a 50 caracteres.",
+                AutoSize = true,
+                MaximumSize = new Size(565, 0),
+                Margin = new Padding(0, 10, 0, 10)
+            };
+            tabla.Controls.Add(cuentasDemo, 0, 7);
+            tabla.SetColumnSpan(cuentasDemo, 2);
+
+            error.ForeColor = Color.DarkRed;
+            error.AutoSize = true;
+            error.MaximumSize = new Size(565, 0);
+            tabla.Controls.Add(error, 0, 8);
+            tabla.SetColumnSpan(error, 2);
+
+            var botones = new FlowLayoutPanel
+            {
+                AutoSize = true,
+                FlowDirection = FlowDirection.RightToLeft,
+                Dock = DockStyle.Fill
+            };
+            var crear = new Button { Text = "Crear cuentas", Width = 130, AutoSize = true };
+            crear.Click += Crear_Click_33ZS;
+            var cancelar = new Button { Text = "Cancelar", Width = 100, AutoSize = true };
+            cancelar.Click += (sender, args) => { DialogResult = DialogResult.Cancel; Close(); };
+            botones.Controls.Add(crear);
+            botones.Controls.Add(cancelar);
+            tabla.Controls.Add(botones, 0, 9);
+            tabla.SetColumnSpan(botones, 2);
+            AcceptButton = crear;
+            CancelButton = cancelar;
+        }
+
+        private static void AgregarCampo_33ZS(TableLayoutPanel tabla, string texto,
+            TextBox campo, int fila)
+        {
+            tabla.Controls.Add(new Label
+            {
+                Text = texto,
+                AutoSize = true,
+                Anchor = AnchorStyles.Left,
+                Margin = new Padding(0, 7, 10, 7)
+            }, 0, fila);
+            campo.Dock = DockStyle.Fill;
+            campo.Margin = new Padding(0, 4, 0, 4);
+            tabla.Controls.Add(campo, 1, fila);
+        }
+
+        private void Crear_Click_33ZS(object sender, EventArgs args)
+        {
+            error.Text = string.Empty;
+            try
+            {
+                AdministradorInicial_33ZS.CrearCuentas_33ZS(
+                    dni.Text, nombre.Text, apellidos.Text, email.Text,
+                    claveAdmin.Text, claveDemo.Text);
+                MessageBox.Show(this,
+                    "Se crearon el administrador y las dos cuentas de ejemplo. " +
+                    "Usá el email y las contraseñas que acabás de elegir para iniciar sesión.",
+                    "Instalación completada", MessageBoxButtons.OK,
+                    MessageBoxIcon.Information);
+                DialogResult = DialogResult.OK;
+                Close();
+            }
+            catch (Exception ex)
+            {
+                error.Text = ex.Message;
+            }
+        }
+    }
+}

@@ -1,7 +1,10 @@
-﻿using DAL;
-using Servicios;
+﻿using Servicios;
+using Mappers.Security;
+using Mappers.Persistence;
 using System;
+using System.Configuration;
 using System.Collections.Generic;
+using System.Data.SqlClient;
 using System.Linq;
 using System.Text.RegularExpressions;
 
@@ -9,15 +12,34 @@ namespace BLL
 {
     public class UsuarioBLL_33ZS
     {
-        UsuarioDAL_33ZS usuarioDAL = new UsuarioDAL_33ZS();
+        UsuarioMapper_33ZS usuarioDAL = new UsuarioMapper_33ZS();
         private readonly BitacoraEventoBLL_33ZS bitacoraBLL = new BitacoraEventoBLL_33ZS();
         private readonly PerfilBLL_33ZS perfilBLL = new PerfilBLL_33ZS();
         private readonly DigitoVerificadorBLL_33ZS dvBLL = new DigitoVerificadorBLL_33ZS();
 
-        private const int MAX_INTENTOS_LOGIN_33ZS = 3;
+        private void GuardarConDV_33ZS(Action cambio, string login = null,
+            TipoEvento_33ZS? tipoEvento = null, int criticidad = 0)
+        {
+            MapperTransaction_33ZS.Ejecutar_33ZS(() =>
+            {
+                cambio();
+                dvBLL.GuardarDigitos_33ZS("Usuario");
+                if (tipoEvento.HasValue)
+                    RegistrarEvento_33ZS(login, tipoEvento.Value, criticidad);
+            });
+        }
 
-        private static Dictionary<string, int> intentosFallidosMemoria_33ZS = new Dictionary<string, int>();
-        
+        private static readonly int MaxIntentosLogin_33ZS = LeerMaxIntentosLogin_33ZS();
+
+        private static int LeerMaxIntentosLogin_33ZS()
+        {
+            int valor;
+            if (!int.TryParse(ConfigurationManager.AppSettings["MaxIntentosLogin"], out valor) ||
+                valor < 1 || valor > 20)
+                throw new ConfigurationErrorsException("Configure MaxIntentosLogin con un entero entre 1 y 20.");
+            return valor;
+        }
+
         public List<Usuario_33ZS> ObtenerUsuarios_33ZS()
         {
             return usuarioDAL.ObtenerUsuarios_33ZS();
@@ -52,13 +74,11 @@ namespace BLL
             if (nuevoUsuario.Password_33ZS.Length > 255)
                 throw new Exception("Usuario.PasswordInicialMuyLarga");
 
-            nuevoUsuario.Password_33ZS = Encriptador_33ZS.Hash(nuevoUsuario.Password_33ZS);
-
-            usuarioDAL.AgregarUsuario_33ZS(nuevoUsuario);
-            dvBLL.GuardarDigitos_33ZS("Usuario");
+            nuevoUsuario.Password_33ZS = PasswordHasher_33ZS.Crear_33ZS(nuevoUsuario.Password_33ZS.Trim());
 
             string loginObjetivo = SessionManager_33ZS.HaySesionActiva_33ZS() ? SessionManager_33ZS.GetInstance_33ZS().UsuarioActual_33ZS.Login_33ZS : nuevoUsuario.Email_33ZS;
-            RegistrarEventoSeguro_33ZS(loginObjetivo, TipoEvento_33ZS.CrearUsuario, 2);
+            GuardarConDV_33ZS(() => usuarioDAL.AgregarUsuario_33ZS(nuevoUsuario),
+                loginObjetivo, TipoEvento_33ZS.CrearUsuario, 2);
         }
 
         public Usuario_33ZS ValidarLogin_33ZS(string login, string password)
@@ -82,34 +102,56 @@ namespace BLL
             if (usuario.Bloqueo_33ZS)
                 throw new Exception("Usuario.Bloqueado");
 
-            string claveIntentos = usuario.DNI_33ZS;
-
-            if (!intentosFallidosMemoria_33ZS.ContainsKey(claveIntentos))
-                intentosFallidosMemoria_33ZS[claveIntentos] = 0;
-
-            string passwordHash = Encriptador_33ZS.Hash(password);
-
-            if (!usuario.Password_33ZS.Equals(passwordHash, StringComparison.OrdinalIgnoreCase))
+            bool actualizarHash;
+            if (!PasswordHasher_33ZS.Verificar_33ZS(password, usuario.Password_33ZS, out actualizarHash))
             {
-                intentosFallidosMemoria_33ZS[claveIntentos]++;
-
-                int intentosRealizados = intentosFallidosMemoria_33ZS[claveIntentos];
-                int intentosRestantes = MAX_INTENTOS_LOGIN_33ZS - intentosRealizados;
-
-                if (intentosRealizados >= MAX_INTENTOS_LOGIN_33ZS)
+                int intentosRealizados = 0;
+                try
                 {
-                    usuarioDAL.BloquearUsuario_33ZS(usuario.DNI_33ZS);
-                    dvBLL.GuardarDigitos_33ZS("Usuario");
-                    intentosFallidosMemoria_33ZS[claveIntentos] = 0;
-                    RegistrarEventoSeguro_33ZS(usuario.Login_33ZS, TipoEvento_33ZS.BloquearUsuario, 3);
-
-                    throw new Exception("Usuario.PasswordIncorrectaBloqueado");
+                    MapperTransaction_33ZS.Ejecutar_33ZS(() =>
+                    {
+                        intentosRealizados = usuarioDAL.RegistrarIntentoFallido_33ZS(
+                            usuario.DNI_33ZS, MaxIntentosLogin_33ZS);
+                        if (intentosRealizados >= MaxIntentosLogin_33ZS)
+                        {
+                            dvBLL.GuardarDigitos_33ZS("Usuario");
+                            RegistrarEvento_33ZS(usuario.Login_33ZS,
+                                TipoEvento_33ZS.BloquearUsuario, 3);
+                        }
+                    });
                 }
+                catch (SqlException ex) when (ex.Number == 52012)
+                {
+                    throw new Exception("Usuario.Bloqueado", ex);
+                }
+
+                int intentosRestantes = MaxIntentosLogin_33ZS - intentosRealizados;
+
+                if (intentosRealizados >= MaxIntentosLogin_33ZS)
+                    throw new Exception("Usuario.PasswordIncorrectaBloqueado");
 
                 throw new Exception($"Login.IntentosRestantes|{intentosRestantes}");
             }
 
-            intentosFallidosMemoria_33ZS[claveIntentos] = 0;
+            string hashActualizado = actualizarHash ? PasswordHasher_33ZS.Crear_33ZS(password) : null;
+            try
+            {
+                MapperTransaction_33ZS.Ejecutar_33ZS(() =>
+                {
+                    usuarioDAL.ReiniciarIntentos_33ZS(usuario.DNI_33ZS);
+                    if (actualizarHash)
+                    {
+                        usuarioDAL.CambiarClave_33ZS(usuario.DNI_33ZS, hashActualizado);
+                        dvBLL.GuardarDigitos_33ZS("Usuario");
+                    }
+                });
+            }
+            catch (SqlException ex) when (ex.Number == 52012)
+            {
+                throw new Exception("Usuario.Bloqueado", ex);
+            }
+            if (actualizarHash)
+                usuario.Password_33ZS = hashActualizado;
 
             SessionManager_33ZS.Login_33ZS(usuario);
 
@@ -134,11 +176,9 @@ namespace BLL
             if (emailUsadoPorOtro)
                 throw new Exception("Usuario.EmailAsignadoAOtro");
 
-            usuarioDAL.ModificarUsuario_33ZS(usuario);
-            dvBLL.GuardarDigitos_33ZS("Usuario");
-
             string loginObjetivo = SessionManager_33ZS.HaySesionActiva_33ZS() ? SessionManager_33ZS.GetInstance_33ZS().UsuarioActual_33ZS.Login_33ZS : usuario.Email_33ZS;
-            RegistrarEventoSeguro_33ZS(loginObjetivo, TipoEvento_33ZS.ModificarUsuario, 2);
+            GuardarConDV_33ZS(() => usuarioDAL.ModificarUsuario_33ZS(usuario),
+                loginObjetivo, TipoEvento_33ZS.ModificarUsuario, 2);
         }
 
         public void DesbloquearUsuario_33ZS(string dni)
@@ -154,11 +194,9 @@ namespace BLL
             if (!usuario.Bloqueo_33ZS)
                 throw new Exception("Usuario.SeleccionNoBloqueado");
 
-            usuarioDAL.DesbloquearUsuario_33ZS(dni);
-            dvBLL.GuardarDigitos_33ZS("Usuario");
-
             string loginObjetivo = SessionManager_33ZS.HaySesionActiva_33ZS() ? SessionManager_33ZS.GetInstance_33ZS().UsuarioActual_33ZS.Login_33ZS : usuario.Email_33ZS;
-            RegistrarEventoSeguro_33ZS(loginObjetivo, TipoEvento_33ZS.DesbloquearUsuario, 2);
+            GuardarConDV_33ZS(() => usuarioDAL.DesbloquearUsuario_33ZS(dni),
+                loginObjetivo, TipoEvento_33ZS.DesbloquearUsuario, 2);
         }
 
         public void CambiarEstadoUsuario_33ZS(string dni)
@@ -173,12 +211,10 @@ namespace BLL
 
             bool nuevoEstado = !usuario.Activo_33ZS;
 
-            usuarioDAL.CambiarEstadoUsuario_33ZS(dni, nuevoEstado);
-            dvBLL.GuardarDigitos_33ZS("Usuario");
-
             TipoEvento_33ZS tipoEvento = usuario.Activo_33ZS ? TipoEvento_33ZS.DesactivarUsuario : TipoEvento_33ZS.ActivarUsuario;
             string loginObjetivo = SessionManager_33ZS.HaySesionActiva_33ZS() ? SessionManager_33ZS.GetInstance_33ZS().UsuarioActual_33ZS.Login_33ZS : usuario.Email_33ZS;
-            RegistrarEventoSeguro_33ZS(loginObjetivo, tipoEvento, 2);
+            GuardarConDV_33ZS(() => usuarioDAL.CambiarEstadoUsuario_33ZS(dni, nuevoEstado),
+                loginObjetivo, tipoEvento, 2);
         }
 
         private void ValidarDatosBasicos_33ZS(Usuario_33ZS usuario)
@@ -296,36 +332,29 @@ namespace BLL
             if (claveNueva == usuarioBD.DNI_33ZS)
                 throw new Exception("Usuario.ClaveIgualDni");
 
-            string claveActualHash = Encriptador_33ZS.Hash(claveActual);
-
-            if (!usuarioBD.Password_33ZS.Equals(claveActualHash, StringComparison.OrdinalIgnoreCase))
+            bool actualizarHash;
+            if (!PasswordHasher_33ZS.Verificar_33ZS(claveActual, usuarioBD.Password_33ZS, out actualizarHash))
                 throw new Exception("Usuario.ClaveActualIncorrecta");
 
-            string claveNuevaHash = Encriptador_33ZS.Hash(claveNueva);
+            string claveNuevaHash = PasswordHasher_33ZS.Crear_33ZS(claveNueva);
 
-            usuarioDAL.CambiarClave_33ZS(usuarioBD.DNI_33ZS, claveNuevaHash);
-            dvBLL.GuardarDigitos_33ZS("Usuario");
+            GuardarConDV_33ZS(() => usuarioDAL.CambiarClave_33ZS(usuarioBD.DNI_33ZS, claveNuevaHash),
+                usuarioBD.Login_33ZS, TipoEvento_33ZS.CambiarClave, 2);
         }
 
-        private void RegistrarEventoSeguro_33ZS(string login, TipoEvento_33ZS tipoEvento, int criticidad)
+        private void RegistrarEvento_33ZS(string login, TipoEvento_33ZS tipoEvento, int criticidad)
         {
-            try
+            BitacoraEvento_33ZS evento = new BitacoraEvento_33ZS
             {
-                BitacoraEvento_33ZS evento = new BitacoraEvento_33ZS
-                {
-                    Login_33ZS = login,
-                    Fecha_33ZS = DateTime.Today,
-                    Hora_33ZS = DateTime.Now,
-                    Modulo_33ZS = ModuloSistema_33ZS.Usuario.ToString(),
-                    NombreEvento_33ZS = tipoEvento.ToString(),
-                    Criticidad_33ZS = criticidad
-                };
+                Login_33ZS = login,
+                Fecha_33ZS = DateTime.Today,
+                Hora_33ZS = DateTime.Now,
+                Modulo_33ZS = ModuloSistema_33ZS.Usuario.ToString(),
+                NombreEvento_33ZS = tipoEvento.ToString(),
+                Criticidad_33ZS = criticidad
+            };
 
-                bitacoraBLL.RegistrarEvento_33ZS(evento);
-            }
-            catch
-            {
-            }
+            bitacoraBLL.RegistrarEvento_33ZS(evento);
         }
         
         public void CambiarIdioma_33ZS(string codigoIdioma)
@@ -335,9 +364,8 @@ namespace BLL
             if (SessionManager_33ZS.HaySesionActiva_33ZS())
             {
                 Usuario_33ZS usuarioSesion = SessionManager_33ZS.GetInstance_33ZS().UsuarioActual_33ZS;
-                usuarioDAL.ActualizarIdioma_33ZS(usuarioSesion.DNI_33ZS, codigoIdioma);
-                dvBLL.GuardarDigitos_33ZS("Usuario");
-                RegistrarEventoSeguro_33ZS(usuarioSesion.Login_33ZS, TipoEvento_33ZS.CambiarIdioma, 5);
+                GuardarConDV_33ZS(() => usuarioDAL.ActualizarIdioma_33ZS(usuarioSesion.DNI_33ZS, codigoIdioma),
+                    usuarioSesion.Login_33ZS, TipoEvento_33ZS.CambiarIdioma, 5);
             }
         }
 
@@ -349,13 +377,14 @@ namespace BLL
 
                 try
                 {
-                    usuarioDAL.ActualizarIdioma_33ZS(usuarioSesion.DNI_33ZS, usuarioSesion.Idioma_33ZS);
+                    GuardarConDV_33ZS(() => usuarioDAL.ActualizarIdioma_33ZS(usuarioSesion.DNI_33ZS, usuarioSesion.Idioma_33ZS));
                 }
                 catch
                 {
                 }
 
-                RegistrarEventoSeguro_33ZS(usuarioSesion.Login_33ZS, TipoEvento_33ZS.Logout, 1);
+                try { RegistrarEvento_33ZS(usuarioSesion.Login_33ZS, TipoEvento_33ZS.Logout, 1); }
+                catch (Exception) { /* El cierre de sesión no depende de la bitácora. */ }
                 SessionManager_33ZS.Logout_33ZS();
             }
         }

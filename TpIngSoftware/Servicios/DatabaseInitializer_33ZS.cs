@@ -3,65 +3,57 @@ using System.Data.SqlClient;
 using System.IO;
 using System.Reflection;
 using System.Text.RegularExpressions;
+using DAL;
 
 namespace Servicios
 {
     public static class DatabaseInitializer_33ZS
     {
-        private static readonly string[] InstanciasSql_33ZS = { @"(localdb)\MSSQLLocalDB", @".\SQLEXPRESS" };
-        private static string cadenaMaster_33ZS;
-
-        private const string NombreBase_33ZS = "TpIngSoftware";
-
-        private static string ObtenerCadenaMaster_33ZS()
-        {
-            if (!string.IsNullOrWhiteSpace(cadenaMaster_33ZS))
-                return cadenaMaster_33ZS;
-
-            foreach (string instancia in InstanciasSql_33ZS)
-            {
-                string candidata = $@"Data Source={instancia};Initial Catalog=master;Integrated Security=True";
-
-                try
-                {
-                    using (SqlConnection conexion = new SqlConnection(candidata))
-                    {
-                        conexion.Open();
-                        cadenaMaster_33ZS = candidata;
-                        return cadenaMaster_33ZS;
-                    }
-                }
-                catch
-                {
-                }
-            }
-
-            throw new InvalidOperationException("No se encontró una instancia SQL disponible en ., .\\SQLEXPRESS o (localdb)\\MSSQLLocalDB.");
-        }
-
         public static bool AsegurarBaseDeDatos_33ZS()
         {
-            if (BaseExiste_33ZS())
-                return false;
+            using (var master = new SqlConnection(DatabaseConnection_33ZS.MasterConnectionString_33ZS()))
+            {
+                master.Open();
+                // Evita que dos procesos de la aplicación creen/inicialicen la misma BD a la vez.
+                using (var lockCommand = new SqlCommand("sys.sp_getapplock", master))
+                {
+                    lockCommand.CommandType = System.Data.CommandType.StoredProcedure;
+                    lockCommand.Parameters.AddWithValue("@Resource", "TpIngSoftware.Initialize." + DatabaseConnection_33ZS.DatabaseName_33ZS());
+                    lockCommand.Parameters.AddWithValue("@LockMode", "Exclusive");
+                    lockCommand.Parameters.AddWithValue("@LockOwner", "Session");
+                    var result = lockCommand.Parameters.Add("@Result", System.Data.SqlDbType.Int);
+                    result.Direction = System.Data.ParameterDirection.ReturnValue;
+                    lockCommand.ExecuteNonQuery();
+                    if (Convert.ToInt32(result.Value) < 0)
+                        throw new InvalidOperationException("No se pudo bloquear la inicialización de la base de datos.");
+                }
 
-            EjecutarScript_33ZS(LeerRecurso_33ZS("BD.sql"));
-            EjecutarScript_33ZS(LeerRecurso_33ZS("QueryCargarDatosIniciales.sql"));
+                if (BaseExiste_33ZS(master))
+                    return false;
 
-            return true;
+                EjecutarScript_33ZS(PrepararNombreBase_33ZS(LeerRecurso_33ZS("BD.sql")));
+                EjecutarScript_33ZS(PrepararNombreBase_33ZS(LeerRecurso_33ZS("QueryCargarDatosIniciales.sql")));
+                return true;
+            }
         }
 
-        private static bool BaseExiste_33ZS()
+        private static bool BaseExiste_33ZS(SqlConnection cn)
         {
-            using (var cn = new SqlConnection(ObtenerCadenaMaster_33ZS()))
+            using (var cmd = new SqlCommand("SELECT DB_ID(@n)", cn))
             {
-                cn.Open();
-                using (var cmd = new SqlCommand("SELECT DB_ID(@n)", cn))
-                {
-                    cmd.Parameters.AddWithValue("@n", NombreBase_33ZS);
-                    var res = cmd.ExecuteScalar();
-                    return res != null && res != DBNull.Value;
-                }
+                cmd.Parameters.AddWithValue("@n", DatabaseConnection_33ZS.DatabaseName_33ZS());
+                var res = cmd.ExecuteScalar();
+                return res != null && res != DBNull.Value;
             }
+        }
+
+        private static string PrepararNombreBase_33ZS(string script)
+        {
+            string name = DatabaseConnection_33ZS.DatabaseName_33ZS();
+            if (name.Length > 128)
+                throw new InvalidOperationException("El nombre de la base de datos supera 128 caracteres.");
+            return script.Replace("N'TpIngSoftware'", "N'" + name.Replace("'", "''") + "'")
+                .Replace("[TpIngSoftware]", "[" + name.Replace("]", "]]") + "]");
         }
 
         private static void EjecutarScript_33ZS(string script)
@@ -69,7 +61,7 @@ namespace Servicios
             string[] lotes = Regex.Split(script, @"^\s*GO\s*$",
                                 RegexOptions.Multiline | RegexOptions.IgnoreCase);
 
-            using (var cn = new SqlConnection(ObtenerCadenaMaster_33ZS()))
+            using (var cn = new SqlConnection(DatabaseConnection_33ZS.MasterConnectionString_33ZS()))
             {
                 cn.Open();
                 foreach (var lote in lotes)

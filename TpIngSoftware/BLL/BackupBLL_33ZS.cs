@@ -1,5 +1,5 @@
-using DAL;
-using Servicios;
+﻿using Servicios;
+using Mappers.Security;
 using System;
 using System.IO;
 
@@ -7,7 +7,7 @@ namespace BLL
 {
     public class BackupBLL_33ZS
     {
-        private readonly BackupDAL_33ZS _dal = new BackupDAL_33ZS();
+        private readonly BackupMapper_33ZS _dal = new BackupMapper_33ZS();
         private readonly BitacoraEventoBLL_33ZS _bitacora = new BitacoraEventoBLL_33ZS();
         private readonly DigitoVerificadorBLL_33ZS _dv = new DigitoVerificadorBLL_33ZS();
 
@@ -43,6 +43,9 @@ namespace BLL
                 throw new Exception("Backup.ArchivoNoExiste");
 
             _dal.RestaurarBackup_33ZS(archivoBak);
+
+            // Un respaldo anterior puede no incluir los procedimientos actuales.
+            DatabaseMigrator_33ZS.AplicarMigraciones_33ZS();
 
             _dv.GenerarTodo_33ZS();
 

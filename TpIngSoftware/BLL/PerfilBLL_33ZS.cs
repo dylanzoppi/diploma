@@ -1,9 +1,9 @@
-using DAL;
-using Servicios;
+﻿using Servicios;
 using Servicios.Composite;
+using Mappers.Security;
+using Mappers.Persistence;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 using System.Text.RegularExpressions;
 
@@ -11,9 +11,20 @@ namespace BLL
 {
     public class PerfilBLL_33ZS
     {
-        private readonly PerfilDAL_33ZS _dal = new PerfilDAL_33ZS();
+        private readonly PerfilMapper_33ZS _dal = new PerfilMapper_33ZS();
         private readonly BitacoraEventoBLL_33ZS bitacoraBLL = new BitacoraEventoBLL_33ZS();
         private readonly DigitoVerificadorBLL_33ZS dvBLL = new DigitoVerificadorBLL_33ZS();
+
+        private void GuardarConDV_33ZS(Action cambio, string login,
+            TipoEvento_33ZS tipoEvento, int criticidad)
+        {
+            MapperTransaction_33ZS.Ejecutar_33ZS(() =>
+            {
+                cambio();
+                dvBLL.GenerarTodo_33ZS();
+                RegistrarEvento_33ZS(login, tipoEvento, criticidad);
+            });
+        }
         private static readonly Regex NombrePerfilRegex_33ZS = new Regex(@"^[\p{L}\p{N}\s_-]+$", RegexOptions.Compiled);
 
         public List<Patente_33ZS> ObtenerPatentes_33ZS()
@@ -174,13 +185,12 @@ namespace BLL
             if (nombreDuplicado)
                 throw new ArgumentException($"Perfil.FamiliaNombreDuplicado|{nombre}");
 
-            int nuevoId = _dal.GuardarFamilia_33ZS(nombre, subComponentes);
-            dvBLL.GenerarTodo_33ZS();
-
+            int nuevoId = 0;
             string login = SessionManager_33ZS.HaySesionActiva_33ZS()
                 ? SessionManager_33ZS.GetInstance_33ZS().UsuarioActual_33ZS.Login_33ZS
                 : "sistema";
-            RegistrarEventoSeguro_33ZS(login, TipoEvento_33ZS.CrearFamilia, 2);
+            GuardarConDV_33ZS(() => nuevoId = _dal.GuardarFamilia_33ZS(nombre, subComponentes),
+                login, TipoEvento_33ZS.CrearFamilia, 2);
 
             Familia_33ZS nueva = new Familia_33ZS(nuevoId, nombre);
             foreach (Componente_33ZS componente in subComponentes)
@@ -228,13 +238,12 @@ namespace BLL
             if (nombreDuplicado)
                 throw new ArgumentException($"Perfil.RolNombreDuplicado|{nombre}");
 
-            int nuevoId = _dal.GuardarRol_33ZS(nombre, subComponentes);
-            dvBLL.GenerarTodo_33ZS();
-
+            int nuevoId = 0;
             string login = SessionManager_33ZS.HaySesionActiva_33ZS()
                 ? SessionManager_33ZS.GetInstance_33ZS().UsuarioActual_33ZS.Login_33ZS
                 : "sistema";
-            RegistrarEventoSeguro_33ZS(login, TipoEvento_33ZS.CrearRol, 2);
+            GuardarConDV_33ZS(() => nuevoId = _dal.GuardarRol_33ZS(nombre, subComponentes),
+                login, TipoEvento_33ZS.CrearRol, 2);
 
             Familia_33ZS nuevo = new Familia_33ZS(nuevoId, nombre);
             foreach (Componente_33ZS componente in subComponentes)
@@ -248,13 +257,11 @@ namespace BLL
             if (_dal.FamiliaEnUso_33ZS(id))
                 throw new ArgumentException("Perfil.FamiliaEnUso");
 
-            _dal.EliminarFamilia_33ZS(id);
-            dvBLL.GenerarTodo_33ZS();
-
             string login = SessionManager_33ZS.HaySesionActiva_33ZS()
                 ? SessionManager_33ZS.GetInstance_33ZS().UsuarioActual_33ZS.Login_33ZS
                 : "sistema";
-            RegistrarEventoSeguro_33ZS(login, TipoEvento_33ZS.EliminarFamilia, 3);
+            GuardarConDV_33ZS(() => _dal.EliminarFamilia_33ZS(id),
+                login, TipoEvento_33ZS.EliminarFamilia, 3);
         }
 
         public bool UsuarioTienePatente_33ZS(Componente_33ZS componente, string nombrePatente)
@@ -287,13 +294,11 @@ namespace BLL
             if (nombreDuplicado)
                 throw new ArgumentException($"Perfil.FamiliaNombreDuplicado|{nombre}");
 
-            _dal.ModificarFamilia_33ZS(id, nombre, subComponentes);
-            dvBLL.GenerarTodo_33ZS();
-
             string login = SessionManager_33ZS.HaySesionActiva_33ZS()
                 ? SessionManager_33ZS.GetInstance_33ZS().UsuarioActual_33ZS.Login_33ZS
                 : "sistema";
-            RegistrarEventoSeguro_33ZS(login, TipoEvento_33ZS.ModificarFamilia, 2);
+            GuardarConDV_33ZS(() => _dal.ModificarFamilia_33ZS(id, nombre, subComponentes),
+                login, TipoEvento_33ZS.ModificarFamilia, 2);
         }
 
         public void ModificarRol_33ZS(int id, string nombre, List<Componente_33ZS> subComponentes)
@@ -310,8 +315,11 @@ namespace BLL
             if (nombreDuplicado)
                 throw new ArgumentException($"Perfil.RolNombreDuplicado|{nombre}");
 
-            _dal.ModificarRol_33ZS(id, nombre, subComponentes);
-            dvBLL.GenerarTodo_33ZS();
+            string login = SessionManager_33ZS.HaySesionActiva_33ZS()
+                ? SessionManager_33ZS.GetInstance_33ZS().UsuarioActual_33ZS.Login_33ZS
+                : "sistema";
+            GuardarConDV_33ZS(() => _dal.ModificarRol_33ZS(id, nombre, subComponentes),
+                login, TipoEvento_33ZS.ModificarRol, 2);
 
             if (SessionManager_33ZS.HaySesionActiva_33ZS() &&
                 SessionManager_33ZS.GetInstance_33ZS().UsuarioActual_33ZS.Rol_33ZS.Equals(rolActual.Nombre, StringComparison.OrdinalIgnoreCase))
@@ -319,10 +327,6 @@ namespace BLL
                 SessionManager_33ZS.GetInstance_33ZS().UsuarioActual_33ZS.Rol_33ZS = nombre;
             }
 
-            string login = SessionManager_33ZS.HaySesionActiva_33ZS()
-                ? SessionManager_33ZS.GetInstance_33ZS().UsuarioActual_33ZS.Login_33ZS
-                : "sistema";
-            RegistrarEventoSeguro_33ZS(login, TipoEvento_33ZS.ModificarRol, 2);
         }
 
         public void EliminarRol_33ZS(int id)
@@ -330,35 +334,25 @@ namespace BLL
             if (_dal.RolEnUso_33ZS(id))
                 throw new ArgumentException("Perfil.RolEnUso");
 
-            _dal.EliminarRol_33ZS(id);
-            dvBLL.GenerarTodo_33ZS();
-
             string login = SessionManager_33ZS.HaySesionActiva_33ZS()
                 ? SessionManager_33ZS.GetInstance_33ZS().UsuarioActual_33ZS.Login_33ZS
                 : "sistema";
-            RegistrarEventoSeguro_33ZS(login, TipoEvento_33ZS.EliminarRol, 3);
+            GuardarConDV_33ZS(() => _dal.EliminarRol_33ZS(id),
+                login, TipoEvento_33ZS.EliminarRol, 3);
         }
 
-        private void RegistrarEventoSeguro_33ZS(string login, TipoEvento_33ZS tipoEvento, int criticidad)
+        private void RegistrarEvento_33ZS(string login, TipoEvento_33ZS tipoEvento, int criticidad)
         {
-            try
+            BitacoraEvento_33ZS evento = new BitacoraEvento_33ZS
             {
-                BitacoraEvento_33ZS evento = new BitacoraEvento_33ZS
-                {
-                    Login_33ZS = login,
-                    Fecha_33ZS = DateTime.Today,
-                    Hora_33ZS = DateTime.Now,
-                    Modulo_33ZS = ModuloSistema_33ZS.Perfiles.ToString(),
-                    NombreEvento_33ZS = tipoEvento.ToString(),
-                    Criticidad_33ZS = criticidad
-                };
-                bitacoraBLL.RegistrarEvento_33ZS(evento);
-            }
-            catch (Exception ex)
-            {
-                Debug.WriteLine($"No se pudo registrar el evento de perfiles: {ex.Message}");
-                Trace.WriteLine($"No se pudo registrar el evento de perfiles: {ex}");
-            }
+                Login_33ZS = login,
+                Fecha_33ZS = DateTime.Today,
+                Hora_33ZS = DateTime.Now,
+                Modulo_33ZS = ModuloSistema_33ZS.Perfiles.ToString(),
+                NombreEvento_33ZS = tipoEvento.ToString(),
+                Criticidad_33ZS = criticidad
+            };
+            bitacoraBLL.RegistrarEvento_33ZS(evento);
         }
     }
 }

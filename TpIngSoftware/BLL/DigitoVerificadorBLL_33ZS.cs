@@ -1,5 +1,6 @@
-using DAL;
-using Servicios;
+﻿using Servicios;
+using Mappers.Integrity;
+using Mappers.Persistence;
 using System.Collections.Generic;
 using System.Data;
 using System.Text;
@@ -8,18 +9,12 @@ namespace BLL
 {
     public class DigitoVerificadorBLL_33ZS
     {
-        private readonly DigitoVerificadorDAL_33ZS _dal = new DigitoVerificadorDAL_33ZS();
+        private readonly DigitoVerificadorMapper_33ZS _dal = new DigitoVerificadorMapper_33ZS();
 
-        private static readonly Dictionary<string, string> _tablas = new Dictionary<string, string>
+        private static readonly string[] _tablas =
         {
-            { "Usuario",         "DNI" },
-            { "Rol",             "ID" },
-            { "Patente",         "ID" },
-            { "Familia",         "ID" },
-            { "Rol_Patente",     "RolID, PatenteID" },
-            { "Rol_Familia",     "RolID, FamiliaID" },
-            { "Patente_Familia", "PatenteID, FamiliaID" },
-            { "FamiliaN",        "FamiliaID, SubFamiliaID" }
+            "Usuario", "Rol", "Patente", "Familia", "Rol_Patente",
+            "Rol_Familia", "Patente_Familia", "FamiliaN"
         };
 
         private string HashGrupo_33ZS(IEnumerable<string> valores)
@@ -59,36 +54,41 @@ namespace BLL
 
         public void GuardarDigitos_33ZS(string tabla)
         {
-            string ordenarPor = _tablas[tabla];
-            DataTable dt = _dal.ObtenerTabla_33ZS(tabla, ordenarPor);
-            _dal.GuardarDV_33ZS(tabla, CalcularDVH_33ZS(dt), CalcularDVV_33ZS(dt));
+            MapperTransaction_33ZS.Ejecutar_33ZS(() =>
+            {
+                DataTable dt = _dal.ObtenerTabla_33ZS(tabla);
+                _dal.GuardarDV_33ZS(tabla, CalcularDVH_33ZS(dt), CalcularDVV_33ZS(dt));
+            });
         }
 
         public void GenerarTodo_33ZS()
         {
-            foreach (KeyValuePair<string, string> t in _tablas)
+            MapperTransaction_33ZS.Ejecutar_33ZS(() =>
             {
-                DataTable dt = _dal.ObtenerTabla_33ZS(t.Key, t.Value);
-                _dal.GuardarDV_33ZS(t.Key, CalcularDVH_33ZS(dt), CalcularDVV_33ZS(dt));
-            }
+                foreach (string tabla in _tablas)
+                {
+                    DataTable dt = _dal.ObtenerTabla_33ZS(tabla);
+                    _dal.GuardarDV_33ZS(tabla, CalcularDVH_33ZS(dt), CalcularDVV_33ZS(dt));
+                }
+            });
         }
 
         public List<string> Verificar_33ZS()
         {
             List<string> inconsistentes = new List<string>();
 
-            foreach (KeyValuePair<string, string> t in _tablas)
+            foreach (string tabla in _tablas)
             {
-                DataTable dt = _dal.ObtenerTabla_33ZS(t.Key, t.Value);
+                DataTable dt = _dal.ObtenerTabla_33ZS(tabla);
                 string dvh = CalcularDVH_33ZS(dt);
                 string dvv = CalcularDVV_33ZS(dt);
 
-                DataTable guardado = _dal.ObtenerDVGuardado_33ZS(t.Key);
+                DataTable guardado = _dal.ObtenerDVGuardado_33ZS(tabla);
                 if (guardado.Rows.Count == 0 ||
                     guardado.Rows[0]["DVH"].ToString() != dvh ||
                     guardado.Rows[0]["DVV"].ToString() != dvv)
                 {
-                    inconsistentes.Add(t.Key);
+                    inconsistentes.Add(tabla);
                 }
             }
 

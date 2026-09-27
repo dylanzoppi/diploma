@@ -131,7 +131,6 @@ namespace TpIngSoftware
 
                 usuarioBLL.CambiarClave_33ZS(claveActual, claveNueva, claveRepetida);
                 string loginSesion = SessionManager_33ZS.GetInstance_33ZS().UsuarioActual_33ZS.Login_33ZS;
-                RegistrarEventoSeguro_33ZS(loginSesion, TipoEvento_33ZS.CambiarClave, 2);
                 RegistrarEventoSeguro_33ZS(loginSesion, TipoEvento_33ZS.Logout, 1);
 
                 MessageBox.Show(SessionManager_33ZS.GetInstance_33ZS().Traducir_33ZS("CambiarClave.MsgExito"));

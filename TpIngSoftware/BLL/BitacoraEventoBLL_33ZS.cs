@@ -1,5 +1,5 @@
-using DAL;
-using Servicios;
+﻿using Servicios;
+using Mappers.Security;
 using System;
 using System.Collections.Generic;
 
@@ -7,7 +7,7 @@ namespace BLL
 {
     public class BitacoraEventoBLL_33ZS
     {
-        BitacoraEventoDAL_33ZS bitacoraDAL = new BitacoraEventoDAL_33ZS();
+        BitacoraEventoMapper_33ZS bitacoraDAL = new BitacoraEventoMapper_33ZS();
 
         public void RegistrarEvento_33ZS(BitacoraEvento_33ZS evento)
         {

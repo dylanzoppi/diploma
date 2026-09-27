@@ -66,6 +66,7 @@
     <Compile Include="CambiarClave33ZS.Designer.cs">
       <DependentUpon>CambiarClave33ZS.cs</DependentUpon>
     </Compile>
+    <Compile Include="ConfiguracionInicial33ZS.cs" />
     <Compile Include="Form1.cs">
       <SubType>Form</SubType>
     </Compile>

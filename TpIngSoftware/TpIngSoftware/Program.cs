@@ -21,13 +21,20 @@ namespace TpIngSoftware
 
             try
             {
-                bool baseCreada = DatabaseInitializer_33ZS.AsegurarBaseDeDatos_33ZS();
+                DatabaseInitializer_33ZS.AsegurarBaseDeDatos_33ZS();
 
-                if (baseCreada)
+                DatabaseMigrator_33ZS.AplicarMigraciones_33ZS();
+
+                if (AdministradorInicial_33ZS.RequiereConfiguracion_33ZS() &&
+                    !AdministradorInicial_33ZS.CrearDesdeEntorno_33ZS())
                 {
-                    // Solo se generan los DV en la inicialización de una BD nueva.
-                    new DigitoVerificadorBLL_33ZS().GenerarTodo_33ZS();
+                    using (ConfiguracionInicial33ZS configuracion = new ConfiguracionInicial33ZS())
+                    {
+                        if (configuracion.ShowDialog() != DialogResult.OK)
+                            return;
+                    }
                 }
+
             }
             catch (Exception ex)
             {
