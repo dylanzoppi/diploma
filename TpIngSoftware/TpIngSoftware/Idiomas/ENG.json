@@ -66,6 +66,8 @@
 
   "GestionUsuarios.Titulo": "User management",
   "GestionUsuarios.TituloGrande": "USERS",
+  "GestionUsuarios.Lista": "Accounts",
+  "GestionUsuarios.Detalle": "Account details",
   "GestionUsuarios.Anadir": "Add",
   "GestionUsuarios.Desbloquear": "Unblock",
   "GestionUsuarios.Modificar": "Edit",

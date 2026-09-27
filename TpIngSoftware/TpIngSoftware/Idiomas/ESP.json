@@ -66,6 +66,8 @@
 
   "GestionUsuarios.Titulo": "Gestión de usuarios",
   "GestionUsuarios.TituloGrande": "USUARIOS",
+  "GestionUsuarios.Lista": "Cuentas",
+  "GestionUsuarios.Detalle": "Datos de la cuenta",
   "GestionUsuarios.Anadir": "Añadir",
   "GestionUsuarios.Desbloquear": "Desbloquear",
   "GestionUsuarios.Modificar": "Modificar",

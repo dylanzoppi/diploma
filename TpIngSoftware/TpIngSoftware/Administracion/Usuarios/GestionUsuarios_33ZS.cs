@@ -2,6 +2,7 @@
 using Servicios;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Drawing;
 using System.Windows.Forms;
 
@@ -18,9 +19,8 @@ namespace TpIngSoftware
 
     public partial class GestionUsuarios_33ZS : Form, IObservador_33ZS
     {
-        UsuarioBLL_33ZS usuarioBLL = new UsuarioBLL_33ZS();
-        BitacoraEventoBLL_33ZS bitacoraBLL = new BitacoraEventoBLL_33ZS();
-        PerfilBLL_33ZS perfilBLL = new PerfilBLL_33ZS();
+        private UsuarioBLL_33ZS usuarioBLL;
+        private PerfilBLL_33ZS perfilBLL;
 
         private ModoFormulario_33ZS modoActual_33ZS = ModoFormulario_33ZS.Filtrar;
         private string _claveMensaje_33ZS = "GestionUsuarios.ModoConsulta";
@@ -28,6 +28,7 @@ namespace TpIngSoftware
         public GestionUsuarios_33ZS()
         {
             InitializeComponent();
+            AplicarDiseno_33ZS();
             modificarBTN.Click += modificarBTN_Click;
             actDesactBTN.Click += activarDesactivarBTN_Click;
             desbloquearBTN.Click += desbloquearBTN_Click;
@@ -37,9 +38,12 @@ namespace TpIngSoftware
             radioButton2.CheckedChanged += radioButton2_CheckedChanged;
             usuariosDGV.CellFormatting += usuariosDGV_CellFormatting;
 
-            SessionManager_33ZS.GetInstance_33ZS().Suscribir_33ZS(this);
-            this.FormClosed += (s, e) =>
-                SessionManager_33ZS.GetInstance_33ZS().Desuscribir_33ZS(this);
+            if (LicenseManager.UsageMode != LicenseUsageMode.Designtime)
+            {
+                SessionManager_33ZS.GetInstance_33ZS().Suscribir_33ZS(this);
+                this.FormClosed += (s, e) =>
+                    SessionManager_33ZS.GetInstance_33ZS().Desuscribir_33ZS(this);
+            }
         }
 
         public void Actualizar_33ZS()
@@ -48,6 +52,8 @@ namespace TpIngSoftware
 
             this.Text = idm.Traducir_33ZS("GestionUsuarios.Titulo");
             label12.Text = idm.Traducir_33ZS("GestionUsuarios.TituloGrande");
+            labelLista.Text = idm.Traducir_33ZS("GestionUsuarios.Lista");
+            labelDetalle.Text = idm.Traducir_33ZS("GestionUsuarios.Detalle");
 
             añadirBTN.Text = idm.Traducir_33ZS("GestionUsuarios.Anadir");
             desbloquearBTN.Text = idm.Traducir_33ZS("GestionUsuarios.Desbloquear");
@@ -69,6 +75,7 @@ namespace TpIngSoftware
             radioButton1.Text = idm.Traducir_33ZS("GestionUsuarios.Activos");
             radioButton2.Text = idm.Traducir_33ZS("GestionUsuarios.Inactivos");
 
+            ConfigurarColumnas_33ZS();
             ActualizarNumeroUsuarios_33ZS();
             label10.Text = idm.Traducir_33ZS(_claveMensaje_33ZS);
             RefrescarCamposBooleanos_33ZS();
@@ -91,9 +98,13 @@ namespace TpIngSoftware
 
         private void GestionUsuarios_Load(object sender, EventArgs e)
         {
+            if (LicenseManager.UsageMode == LicenseUsageMode.Designtime)
+                return;
+            usuarioBLL = new UsuarioBLL_33ZS();
+            perfilBLL = new PerfilBLL_33ZS();
             ConfigurarGrilla_33ZS();
             CargarRoles_33ZS();
-            CargarGrillaActivos_33ZS();
+            radioButton1.Checked = true;
             LimpiarCampos_33ZS();
             HabilitarBotones_33ZS();
             AplicarPermisos_33ZS();
@@ -134,11 +145,13 @@ namespace TpIngSoftware
         }
         private void usuariosDGV_CellFormatting(object sender, DataGridViewCellFormattingEventArgs e)
         {
+            if (e.RowIndex < 0)
+                return;
             if (usuariosDGV.Rows[e.RowIndex].DataBoundItem is Usuario_33ZS usuario)
             {
                 if (!usuario.Activo_33ZS)
                 {
-                    usuariosDGV.Rows[e.RowIndex].DefaultCellStyle.BackColor = Color.LightCoral;
+                    usuariosDGV.Rows[e.RowIndex].DefaultCellStyle.BackColor = Color.FromArgb(250, 241, 238);
                 }
                 else
                 {
@@ -152,25 +165,17 @@ namespace TpIngSoftware
             usuariosDGV.MultiSelect = false;
             usuariosDGV.ReadOnly = true;
             usuariosDGV.AutoGenerateColumns = true;
+            usuariosDGV.AllowUserToAddRows = false;
+            usuariosDGV.AllowUserToDeleteRows = false;
+            usuariosDGV.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
         }
 
         private void CargarGrilla_33ZS()
         {
-            try
-            {
-                usuariosDGV.DataSource = null;
-                usuariosDGV.DataSource = usuarioBLL.ObtenerUsuarios_33ZS();
-                OcultarColumnasSensiblesGrilla_33ZS();
-
-                ActualizarNumeroUsuarios_33ZS();
-                DeseleccionarGrilla_33ZS();
-            }
-            catch (Exception ex)
-            {
-                var idm = SessionManager_33ZS.GetInstance_33ZS();
-                MessageBox.Show(idm.Traducir_33ZS("GestionUsuarios.ErrorCargarUsuariosDetalle") + " " + idm.Traducir_33ZS(ex.Message));
-                MostrarMensaje_33ZS("GestionUsuarios.ErrorCargar");
-            }
+            if (radioButton2.Checked)
+                CargarGrillaInactivos_33ZS();
+            else
+                CargarGrillaActivos_33ZS();
         }
 
         private void CargarGrillaActivos_33ZS()
@@ -335,7 +340,10 @@ namespace TpIngSoftware
                         return;
                 }
 
-                CargarGrilla_33ZS();
+                if (modoActual_33ZS == ModoFormulario_33ZS.Añadir && radioButton2.Checked)
+                    radioButton1.Checked = true;
+                else
+                    CargarGrilla_33ZS();
                 LimpiarCampos_33ZS();
                 HabilitarBotones_33ZS();
                 DeseleccionarGrilla_33ZS();
@@ -558,11 +566,11 @@ namespace TpIngSoftware
             radioButton1.Enabled = true;
             radioButton2.Enabled = true;
 
-            DNIBOX.Enabled = true;
-            ApellidosBOX.Enabled = true;
-            nombresBOX.Enabled = true;
-            emailBOX.Enabled = true;
-            rolBOX.Enabled = true;
+            DNIBOX.Enabled = false;
+            ApellidosBOX.Enabled = false;
+            nombresBOX.Enabled = false;
+            emailBOX.Enabled = false;
+            rolBOX.Enabled = false;
             bloqueadoBOX.Enabled = false;
             activoBOX.Enabled = false;
             MostrarMensaje_33ZS("GestionUsuarios.ModoConsulta");
@@ -607,6 +615,37 @@ namespace TpIngSoftware
         {
             if (usuariosDGV.Columns["Password_33ZS"] != null)
                 usuariosDGV.Columns["Password_33ZS"].Visible = false;
+            if (usuariosDGV.Columns["Login_33ZS"] != null)
+                usuariosDGV.Columns["Login_33ZS"].Visible = false;
+            if (usuariosDGV.Columns["Idioma_33ZS"] != null)
+                usuariosDGV.Columns["Idioma_33ZS"].Visible = false;
+            ConfigurarColumnas_33ZS();
+        }
+
+        private void ConfigurarColumnas_33ZS()
+        {
+            var idm = SessionManager_33ZS.GetInstance_33ZS();
+            var encabezados = new Dictionary<string, string>
+            {
+                { "DNI_33ZS", "GestionUsuarios.DNI" },
+                { "Apellidos_33ZS", "GestionUsuarios.Apellidos" },
+                { "Nombre_33ZS", "GestionUsuarios.Nombres" },
+                { "Email_33ZS", "GestionUsuarios.Email" },
+                { "Rol_33ZS", "GestionUsuarios.Rol" },
+                { "Bloqueo_33ZS", "GestionUsuarios.Bloqueado" },
+                { "Activo_33ZS", "GestionUsuarios.Activo" }
+            };
+            foreach (var par in encabezados)
+                if (usuariosDGV.Columns[par.Key] != null)
+                    usuariosDGV.Columns[par.Key].HeaderText = idm.Traducir_33ZS(par.Value);
+            if (usuariosDGV.Columns["DNI_33ZS"] != null)
+                usuariosDGV.Columns["DNI_33ZS"].FillWeight = 75;
+            if (usuariosDGV.Columns["Email_33ZS"] != null)
+                usuariosDGV.Columns["Email_33ZS"].FillWeight = 150;
+            if (usuariosDGV.Columns["Bloqueo_33ZS"] != null)
+                usuariosDGV.Columns["Bloqueo_33ZS"].FillWeight = 72;
+            if (usuariosDGV.Columns["Activo_33ZS"] != null)
+                usuariosDGV.Columns["Activo_33ZS"].FillWeight = 58;
         }
        
     }
