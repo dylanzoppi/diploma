@@ -1,4 +1,5 @@
 using System;
+using System.ComponentModel;
 using System.Drawing;
 using System.Globalization;
 using System.Windows.Forms;
@@ -9,83 +10,22 @@ using TpIngSoftware.PN1;
 
 namespace TpIngSoftware
 {
-    public sealed class Form1 : Form
+    public partial class Form1 : Form
     {
-        private readonly PN1BLL_33ZS negocio = new PN1BLL_33ZS();
-        private readonly FlowLayoutPanel navegacion = new FlowLayoutPanel();
-        private readonly FlowLayoutPanel accesos = new FlowLayoutPanel();
-        private readonly Label titulo = new Label();
-        private readonly Label subtitulo = new Label();
-        private readonly Label accesosTitulo = new Label();
-        private Button claveBoton;
-        private Button salirBoton;
+        private PN1BLL_33ZS negocio;
 
         private static string T(string espanol, string ingles) => EstiloPN1_33ZS.T(espanol, ingles);
 
         public Form1()
         {
-            Text = "Harlem · Gestión de barbería";
-            StartPosition = FormStartPosition.CenterScreen;
-            MinimumSize = new Size(970, 620);
-            Size = new Size(1200, 750);
-            BackColor = EstiloPN1_33ZS.Fondo;
-            Font = new Font("Segoe UI", 10);
+            InitializeComponent();
+            if (LicenseManager.UsageMode == LicenseUsageMode.Designtime)
+                return;
 
-            var lateral = new TableLayoutPanel { Dock = DockStyle.Left, Width = 245,
-                ColumnCount = 1, RowCount = 3,
-                BackColor = EstiloPN1_33ZS.Tinta, Padding = new Padding(18, 24, 18, 18) };
-            lateral.RowStyles.Add(new RowStyle(SizeType.Absolute, 62));
-            lateral.RowStyles.Add(new RowStyle(SizeType.Percent, 100));
-            lateral.RowStyles.Add(new RowStyle(SizeType.Absolute, 106));
-            Controls.Add(lateral);
-            navegacion.Dock = DockStyle.Fill;
-            navegacion.FlowDirection = FlowDirection.TopDown;
-            navegacion.WrapContents = false;
-            navegacion.AutoScroll = true;
-            lateral.Controls.Add(navegacion, 0, 1);
-            var marca = new Label { Dock = DockStyle.Top, Height = 62, Text = "HARLEM",
-                Font = new Font("Segoe UI Semibold", 23), ForeColor = Color.White };
-            lateral.Controls.Add(marca, 0, 0);
-            var pie = new Panel { Dock = DockStyle.Bottom, Height = 150,
-                BackColor = EstiloPN1_33ZS.Tinta };
-            lateral.Controls.Add(pie, 0, 2);
-            lateral.RowStyles[2].Height = 150;
-            var idioma = BotonLateral("Español / English", CambiarIdioma);
-            pie.Controls.Add(idioma);
-            idioma.Dock = DockStyle.Top;
-            claveBoton = BotonLateral("Cambiar contraseña", () => Abrir(new CambiarClave33ZS()));
-            pie.Controls.Add(claveBoton);
-            claveBoton.Dock = DockStyle.Top;
-            salirBoton = BotonLateral("Cerrar sesión", CerrarSesion);
-            pie.Controls.Add(salirBoton);
-            salirBoton.Dock = DockStyle.Bottom;
-
-            var cuerpo = new TableLayoutPanel { Dock = DockStyle.Fill, Padding = new Padding(38),
-                ColumnCount = 1, RowCount = 4 };
-            cuerpo.RowStyles.Add(new RowStyle(SizeType.AutoSize));
-            cuerpo.RowStyles.Add(new RowStyle(SizeType.AutoSize));
-            cuerpo.RowStyles.Add(new RowStyle(SizeType.AutoSize));
-            cuerpo.RowStyles.Add(new RowStyle(SizeType.Percent, 100));
-            Controls.Add(cuerpo);
-            cuerpo.BringToFront();
-            titulo.AutoSize = true;
-            titulo.Font = new Font("Segoe UI Semibold", 27);
-            titulo.ForeColor = EstiloPN1_33ZS.Tinta;
-            cuerpo.Controls.Add(titulo, 0, 0);
-            subtitulo.AutoSize = true;
-            subtitulo.ForeColor = Color.FromArgb(95, 99, 98);
-            subtitulo.Margin = new Padding(0, 2, 0, 30);
-            cuerpo.Controls.Add(subtitulo, 0, 1);
-            accesosTitulo.Text = "ACCESOS DISPONIBLES";
-            accesosTitulo.AutoSize = true;
-            accesosTitulo.Font = new Font("Segoe UI Semibold", 10);
-            accesosTitulo.ForeColor = EstiloPN1_33ZS.Acento;
-            accesosTitulo.Margin = new Padding(0, 0, 0, 14);
-            cuerpo.Controls.Add(accesosTitulo, 0, 2);
-            accesos.Dock = DockStyle.Fill;
-            accesos.AutoScroll = true;
-            cuerpo.Controls.Add(accesos, 0, 3);
-
+            negocio = new PN1BLL_33ZS();
+            idiomaBoton.Click += (s, e) => CambiarIdioma();
+            claveBoton.Click += (s, e) => Abrir(new CambiarClave33ZS());
+            salirBoton.Click += (s, e) => CerrarSesion();
             Load += (s, e) => Configurar();
             FormClosed += (s, e) =>
             {
@@ -133,6 +73,8 @@ namespace TpIngSoftware
 
         private void Configurar()
         {
+            if (DesignMode || LicenseManager.UsageMode == LicenseUsageMode.Designtime)
+                return;
             var usuario = SessionManager_33ZS.GetInstance_33ZS().UsuarioActual_33ZS;
             if (usuario == null) { Close(); return; }
             bool ingles = SessionManager_33ZS.GetInstance_33ZS().GetIdiomaActual_33ZS() == "ENG";

@@ -39,7 +39,7 @@ PN1 ya tiene flujo funcional presencial y tablas propias. PN2 (compras y reposic
 
 La interfaz agrupa `Acceso`, `Principal`, `Administracion` (usuarios, perfiles y bitácora) y `Mantenimiento` (integridad y respaldos). En `BLL`, las clases existentes se agrupan por responsabilidad en `Usuarios`, `Perfiles`, `Bitacora`, `Integridad` y `Respaldos`. En `Servicios`, `BaseDatos` contiene el inicializador, el migrador, los scripts de instalación y `Migraciones`; `Seguridad`, `Entidades` y `Observador` reúnen los servicios compartidos. `App.config`, `Program.cs` y los archivos propios de cada proyecto permanecen en su raíz.
 
-Los formularios heredados conservan juntos sus archivos `.cs`, `.Designer.cs` y `.resx`. El menú principal y las pantallas de PN1 construyen sus controles en código; el proyecto los declara con sus rutas nuevas. La reorganización no cambia las responsabilidades entre capas.
+Los formularios heredados conservan juntos sus archivos `.cs`, `.Designer.cs` y `.resx`. `Form1` vuelve a tener `Form1.Designer.cs` para editar su estructura en Visual Studio; los accesos según patente se cargan sólo durante la ejecución. Las pantallas de PN1 construyen sus controles en código. La reorganización no cambia las responsabilidades entre capas.
 
 ## Organización de PN1 y continuación de PN2
 
