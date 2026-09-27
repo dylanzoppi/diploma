@@ -23,7 +23,7 @@ El scaffold existente implementa usuarios, roles y permisos, sesión, idiomas, b
 
 Las contraseñas nuevas usan PBKDF2 con sal individual. El inicio de sesión reconoce los hashes SHA-256 heredados y los reemplaza tras una validación correcta; `Encriptador_33ZS.Hash` sigue usándose para el cálculo de dígitos verificadores. Los parámetros de política ajustables están en `App.config`.
 
-Las migraciones y la inicialización de la base permanecen en `Servicios` como infraestructura del proyecto. La migración `002_ProcedimientosSeguridad.sql` incorpora los SP de la seguridad existente; la `003_IntegridadFamilias.sql` evita borrar familias referenciadas y comprueba ciclos dentro de la transacción; la `004_IntentosLogin.sql` persiste los intentos fallidos y el bloqueo. Sus escrituras usan transacción, `XACT_ABORT`, rollback y propagación de errores. La BLL agrupa el cambio, el cálculo de DV y el evento de bitácora de usuarios y perfiles en una transacción de aplicación. En una base nueva, el formulario inicial o las variables de entorno aportan las contraseñas para un administrador y dos cuentas Invitado de ejemplo. Las tres altas se confirman juntas; el repositorio no contiene claves iniciales conocidas. La conexión se configura una sola vez en `App.config`, con posibilidad de sustituirla mediante `TPINGSOFTWARE_CONNECTION_STRING` durante pruebas o instalaciones. Las operaciones de respaldo y restauración siguen siendo comandos de instancia en DAL: SQL Server no permite ejecutarlas dentro de una transacción de usuario ni alojar el procedimiento de restauración en la misma base que se está restaurando.
+Las migraciones y la inicialización de la base permanecen en `Servicios/BaseDatos` como infraestructura del proyecto. La migración `002_ProcedimientosSeguridad.sql` incorpora los SP de la seguridad existente; la `003_IntegridadFamilias.sql` evita borrar familias referenciadas y comprueba ciclos dentro de la transacción; la `004_IntentosLogin.sql` persiste los intentos fallidos y el bloqueo. Sus escrituras usan transacción, `XACT_ABORT`, rollback y propagación de errores. La BLL agrupa el cambio, el cálculo de DV y el evento de bitácora de usuarios y perfiles en una transacción de aplicación. En una base nueva, el formulario inicial o las variables de entorno aportan las contraseñas para un administrador y dos cuentas Invitado de ejemplo. Las tres altas se confirman juntas; el repositorio no contiene claves iniciales conocidas. La conexión se configura una sola vez en `App.config`, con posibilidad de sustituirla mediante `TPINGSOFTWARE_CONNECTION_STRING` durante pruebas o instalaciones. Las operaciones de respaldo y restauración siguen siendo comandos de instancia en DAL: SQL Server no permite ejecutarlas dentro de una transacción de usuario ni alojar el procedimiento de restauración en la misma base que se está restaurando.
 
 Todavía no hay módulos funcionales de PN1 o PN2 ni tablas de negocio en la base actual.
 
@@ -35,6 +35,12 @@ Todavía no hay módulos funcionales de PN1 o PN2 ni tablas de negocio en la bas
 - **Seguridad existente:** su lógica está distribuida entre `BLL`, `Mappers` y `Servicios`. Se mantiene esa organización para preservar el funcionamiento del scaffold al desarrollar PN1 y PN2.
 - **Pendiente:** poblar `BE` con entidades del dominio Harlem y desarrollar los módulos de PN1 y PN2. Las entidades heredadas de seguridad continúan en `Servicios` para preservar la compatibilidad del scaffold.
 
+## Carpetas del scaffold actual
+
+La interfaz agrupa `Acceso`, `Principal`, `Administracion` (usuarios, perfiles y bitácora) y `Mantenimiento` (integridad y respaldos). En `BLL`, las clases existentes se agrupan por responsabilidad en `Usuarios`, `Perfiles`, `Bitacora`, `Integridad` y `Respaldos`. En `Servicios`, `BaseDatos` contiene el inicializador, el migrador, los scripts de instalación y `Migraciones`; `Seguridad`, `Entidades` y `Observador` reúnen los servicios compartidos. `App.config`, `Program.cs` y los archivos propios de cada proyecto permanecen en su raíz.
+
+Los formularios conservan juntos sus archivos `.cs`, `.Designer.cs` y `.resx`. El proyecto los declara con sus rutas nuevas para que Visual Studio mantenga el diseñador y los recursos vinculados. La reorganización no cambia las responsabilidades entre capas ni aplica scripts a una base existente.
+
 ## Organización objetivo para PN1 y PN2
 
 Cada módulo funcional nuevo tendrá archivos correspondientes en las capas necesarias. El primer recorrido, para identificar o dar de alta un cliente (CUN01), puede organizarse así:
@@ -44,7 +50,7 @@ BE/Clientes/Cliente_33ZS.cs
 BLL/Clientes/ClienteBLL_33ZS.cs
 Mappers/Clientes/ClienteMapper_33ZS.cs
 DAL/Clientes/ClienteDataAccess_33ZS.cs
-Servicios/Migrations/005_Clientes.sql  (tablas y SP versionados)
+Servicios/BaseDatos/Migraciones/005_Clientes.sql  (tablas y SP versionados)
 TpIngSoftware/Clientes/ClienteForm_33ZS.cs
 ```
 
@@ -55,7 +61,7 @@ Las responsabilidades son:
 - `BE`: entidades y tipos del dominio, sin referencias a otras capas.
 - `BLL`: validaciones, reglas de negocio y coordinación de operaciones; no contiene SQL ni abre conexiones.
 - `Mappers`: transforma resultados de persistencia en entidades y prepara los datos que recibe `DAL`; no administra conexiones ni transacciones.
-- `DAL`: invoca procedimientos parametrizados y administra conexiones y transacciones. Los scripts versionados se aplican mediante `Servicios/DatabaseMigrator_33ZS.cs`.
+- `DAL`: invoca procedimientos parametrizados y administra conexiones y transacciones. Los scripts versionados se aplican mediante `Servicios/BaseDatos/DatabaseMigrator_33ZS.cs`.
 - `Servicios`: mantiene autenticación, autorización, sesión, idiomas, bitácora, respaldo, integridad e infraestructura de migraciones existentes. Su distribución interna puede revisarse sin desplazar ni romper el scaffold actual.
 - `TpIngSoftware`: formularios, navegación y presentación; no contiene SQL ni reglas de negocio.
 

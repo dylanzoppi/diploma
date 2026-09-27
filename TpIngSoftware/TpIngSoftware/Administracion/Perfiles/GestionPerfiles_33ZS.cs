@@ -5,7 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Windows.Forms;
-using TpIngSoftware.GestiosPerfiles;
+using TpIngSoftware.Administracion.Perfiles;
 
 namespace TpIngSoftware
 {

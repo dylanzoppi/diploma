@@ -43,13 +43,13 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="BackupBLL_33ZS.cs" />
-    <Compile Include="AdministradorInicial_33ZS.cs" />
-    <Compile Include="BitacoraEventoBLL_33ZS.cs" />
-    <Compile Include="DigitoVerificadorBLL_33ZS.cs" />
-    <Compile Include="PerfilBLL_33ZS.cs" />
+    <Compile Include="Respaldos\BackupBLL_33ZS.cs" />
+    <Compile Include="Usuarios\AdministradorInicial_33ZS.cs" />
+    <Compile Include="Bitacora\BitacoraEventoBLL_33ZS.cs" />
+    <Compile Include="Integridad\DigitoVerificadorBLL_33ZS.cs" />
+    <Compile Include="Perfiles\PerfilBLL_33ZS.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="UsuarioBLL_33ZS.cs" />
+    <Compile Include="Usuarios\UsuarioBLL_33ZS.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\BE\BE_33ZS.csproj">

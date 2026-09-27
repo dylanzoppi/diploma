@@ -1,4 +1,4 @@
-namespace TpIngSoftware.GestiosPerfiles
+namespace TpIngSoftware.Administracion.Perfiles
 {
     partial class ModificarEliminarPerfiles
     {

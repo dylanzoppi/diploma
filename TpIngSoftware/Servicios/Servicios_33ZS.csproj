@@ -44,27 +44,27 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="BitacoraEvento_33ZS.cs" />
-    <Compile Include="DatabaseInitializer_33ZS.cs" />
-    <Compile Include="DatabaseMigrator_33ZS.cs" />
-    <Compile Include="Composite\Familia_33ZS.cs" />
-    <Compile Include="Composite\Patente_33ZS.cs" />
-    <Compile Include="Composite\Componente_33ZS.cs" />
-    <Compile Include="Encriptador_33ZS.cs" />
-    <Compile Include="PasswordHasher_33ZS.cs" />
-    <Compile Include="IObservador_33ZS.cs" />
+    <Compile Include="Entidades\BitacoraEvento_33ZS.cs" />
+    <Compile Include="BaseDatos\DatabaseInitializer_33ZS.cs" />
+    <Compile Include="BaseDatos\DatabaseMigrator_33ZS.cs" />
+    <Compile Include="Entidades\Composite\Familia_33ZS.cs" />
+    <Compile Include="Entidades\Composite\Patente_33ZS.cs" />
+    <Compile Include="Entidades\Composite\Componente_33ZS.cs" />
+    <Compile Include="Seguridad\Encriptador_33ZS.cs" />
+    <Compile Include="Seguridad\PasswordHasher_33ZS.cs" />
+    <Compile Include="Observador\IObservador_33ZS.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="SessionManager_33ZS.cs" />
-    <Compile Include="Sujeto_33ZS.cs" />
-    <Compile Include="Usuario_33ZS.cs" />
+    <Compile Include="Seguridad\SessionManager_33ZS.cs" />
+    <Compile Include="Observador\Sujeto_33ZS.cs" />
+    <Compile Include="Entidades\Usuario_33ZS.cs" />
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="BD.sql" />
-    <EmbeddedResource Include="Migrations\001_AlinearSeguridad.sql" />
-    <EmbeddedResource Include="Migrations\002_ProcedimientosSeguridad.sql" />
-    <EmbeddedResource Include="Migrations\003_IntegridadFamilias.sql" />
-    <EmbeddedResource Include="Migrations\004_IntentosLogin.sql" />
-    <EmbeddedResource Include="QueryCargarDatosIniciales.sql" />
+    <EmbeddedResource Include="BaseDatos\BD.sql" />
+    <EmbeddedResource Include="BaseDatos\Migraciones\001_AlinearSeguridad.sql" />
+    <EmbeddedResource Include="BaseDatos\Migraciones\002_ProcedimientosSeguridad.sql" />
+    <EmbeddedResource Include="BaseDatos\Migraciones\003_IntegridadFamilias.sql" />
+    <EmbeddedResource Include="BaseDatos\Migraciones\004_IntentosLogin.sql" />
+    <EmbeddedResource Include="BaseDatos\QueryCargarDatosIniciales.sql" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\DAL\DAL_33ZS.csproj">

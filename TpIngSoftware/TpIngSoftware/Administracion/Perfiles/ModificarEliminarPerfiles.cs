@@ -7,7 +7,7 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.Windows.Forms;
 
-namespace TpIngSoftware.GestiosPerfiles
+namespace TpIngSoftware.Administracion.Perfiles
 {
     public partial class ModificarEliminarPerfiles : Form, IObservador_33ZS
     {

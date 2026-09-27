@@ -54,88 +54,88 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="BitacoraEventos33ZS.cs">
+    <Compile Include="Administracion\Bitacora\BitacoraEventos33ZS.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="BitacoraEventos33ZS.Designer.cs">
+    <Compile Include="Administracion\Bitacora\BitacoraEventos33ZS.Designer.cs">
       <DependentUpon>BitacoraEventos33ZS.cs</DependentUpon>
     </Compile>
-    <Compile Include="CambiarClave33ZS.cs">
+    <Compile Include="Acceso\CambiarClave33ZS.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="CambiarClave33ZS.Designer.cs">
+    <Compile Include="Acceso\CambiarClave33ZS.Designer.cs">
       <DependentUpon>CambiarClave33ZS.cs</DependentUpon>
     </Compile>
-    <Compile Include="ConfiguracionInicial33ZS.cs" />
-    <Compile Include="Form1.cs">
+    <Compile Include="Acceso\ConfiguracionInicial33ZS.cs" />
+    <Compile Include="Principal\Form1.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="Form1.Designer.cs">
+    <Compile Include="Principal\Form1.Designer.cs">
       <DependentUpon>Form1.cs</DependentUpon>
     </Compile>
-    <Compile Include="GestiosPerfiles\GestionPerfiles_33ZS.cs">
+    <Compile Include="Administracion\Perfiles\GestionPerfiles_33ZS.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="GestiosPerfiles\GestionPerfiles_33ZS.Designer.cs">
+    <Compile Include="Administracion\Perfiles\GestionPerfiles_33ZS.Designer.cs">
       <DependentUpon>GestionPerfiles_33ZS.cs</DependentUpon>
     </Compile>
-    <Compile Include="GestiosPerfiles\ModificarEliminarPerfiles.cs">
+    <Compile Include="Administracion\Perfiles\ModificarEliminarPerfiles.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="GestiosPerfiles\ModificarEliminarPerfiles.Designer.cs">
+    <Compile Include="Administracion\Perfiles\ModificarEliminarPerfiles.Designer.cs">
       <DependentUpon>ModificarEliminarPerfiles.cs</DependentUpon>
     </Compile>
-    <Compile Include="GestionUsuarios_33ZS.cs">
+    <Compile Include="Administracion\Usuarios\GestionUsuarios_33ZS.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="GestionUsuarios_33ZS.Designer.cs">
+    <Compile Include="Administracion\Usuarios\GestionUsuarios_33ZS.Designer.cs">
       <DependentUpon>GestionUsuarios_33ZS.cs</DependentUpon>
     </Compile>
-    <Compile Include="Login33ZS.cs">
+    <Compile Include="Acceso\Login33ZS.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="Login33ZS.Designer.cs">
+    <Compile Include="Acceso\Login33ZS.Designer.cs">
       <DependentUpon>Login33ZS.cs</DependentUpon>
     </Compile>
     <Compile Include="Program.cs" />
-    <Compile Include="Reparacion_33ZS.cs">
+    <Compile Include="Mantenimiento\Integridad\Reparacion_33ZS.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="Reparacion_33ZS.Designer.cs">
+    <Compile Include="Mantenimiento\Integridad\Reparacion_33ZS.Designer.cs">
       <DependentUpon>Reparacion_33ZS.cs</DependentUpon>
     </Compile>
-    <Compile Include="Respaldo_33ZS.cs">
+    <Compile Include="Mantenimiento\Respaldos\Respaldo_33ZS.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="Respaldo_33ZS.Designer.cs">
+    <Compile Include="Mantenimiento\Respaldos\Respaldo_33ZS.Designer.cs">
       <DependentUpon>Respaldo_33ZS.cs</DependentUpon>
     </Compile>
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <EmbeddedResource Include="BitacoraEventos33ZS.resx">
+    <EmbeddedResource Include="Administracion\Bitacora\BitacoraEventos33ZS.resx">
       <DependentUpon>BitacoraEventos33ZS.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="CambiarClave33ZS.resx">
+    <EmbeddedResource Include="Acceso\CambiarClave33ZS.resx">
       <DependentUpon>CambiarClave33ZS.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="Form1.resx">
+    <EmbeddedResource Include="Principal\Form1.resx">
       <DependentUpon>Form1.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="GestiosPerfiles\GestionPerfiles_33ZS.resx">
+    <EmbeddedResource Include="Administracion\Perfiles\GestionPerfiles_33ZS.resx">
       <DependentUpon>GestionPerfiles_33ZS.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="GestiosPerfiles\ModificarEliminarPerfiles.resx">
+    <EmbeddedResource Include="Administracion\Perfiles\ModificarEliminarPerfiles.resx">
       <DependentUpon>ModificarEliminarPerfiles.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="GestionUsuarios_33ZS.resx">
+    <EmbeddedResource Include="Administracion\Usuarios\GestionUsuarios_33ZS.resx">
       <DependentUpon>GestionUsuarios_33ZS.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="Login33ZS.resx">
+    <EmbeddedResource Include="Acceso\Login33ZS.resx">
       <DependentUpon>Login33ZS.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="Reparacion_33ZS.resx">
+    <EmbeddedResource Include="Mantenimiento\Integridad\Reparacion_33ZS.resx">
       <DependentUpon>Reparacion_33ZS.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="Respaldo_33ZS.resx">
+    <EmbeddedResource Include="Mantenimiento\Respaldos\Respaldo_33ZS.resx">
       <DependentUpon>Respaldo_33ZS.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Properties\Resources.resx">
