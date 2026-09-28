@@ -77,6 +77,7 @@
     <Compile Include="PN1\ClientesForm_33ZS.cs" />
     <Compile Include="PN1\BarberosForm_33ZS.cs" />
     <Compile Include="PN1\CatalogoForm_33ZS.cs" />
+    <Compile Include="PN1\ServicioEditorForm_33ZS.cs" />
     <Compile Include="PN1\NuevaAtencionForm_33ZS.cs" />
     <Compile Include="PN1\HistorialForm_33ZS.cs" />
     <Compile Include="Presentacion\EstiloPantallas_33ZS.cs" />

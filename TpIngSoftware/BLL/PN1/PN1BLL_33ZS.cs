@@ -83,11 +83,37 @@ namespace BLL.PN1
             return mapper.ListarConsumos(servicioId);
         }
 
-        public void ActualizarPrecio(int servicioId, decimal precio, bool activo)
+        public DisponibilidadServicio_33ZS EvaluarDisponibilidadServicio(int servicioId)
+        {
+            Exigir("RegistrarAtencion");
+            var consumos = mapper.ListarConsumos(servicioId);
+            return new DisponibilidadServicio_33ZS
+            {
+                Consumos = consumos,
+                NoDisponibles = consumos.Where(c => !c.Activo || c.Stock < c.Cantidad)
+                    .Select(c => new FaltanteInsumo_33ZS
+                    {
+                        Insumo = c.Insumo,
+                        Faltante = Math.Max(0, c.Cantidad - c.Stock),
+                        Activo = c.Activo
+                    }).ToList()
+            };
+        }
+
+        public int GuardarServicio(int? servicioId, string nombre, decimal precio,
+            bool activo, List<ConsumoServicio_33ZS> consumos)
         {
             Exigir("GestionarCatalogo");
-            if (precio <= 0) throw new ArgumentException("El precio debe ser mayor que cero.");
-            mapper.ActualizarPrecio(servicioId, precio, activo);
+            nombre = (nombre ?? "").Trim();
+            if (servicioId.HasValue && servicioId.Value <= 0)
+                throw new ArgumentException("El servicio seleccionado no es válido.");
+            if (nombre.Length == 0 || nombre.Length > 100 || precio <= 0)
+                throw new ArgumentException("Ingresá un nombre y un precio válidos.");
+            if (consumos == null || consumos.Count == 0 ||
+                consumos.Any(c => c.InsumoId <= 0 || c.Cantidad <= 0) ||
+                consumos.Select(c => c.InsumoId).Distinct().Count() != consumos.Count)
+                throw new ArgumentException("Elegí al menos un insumo con una cantidad positiva, sin repetirlo.");
+            return mapper.GuardarServicio(servicioId, nombre, precio, activo, consumos);
         }
 
         public List<Insumo_33ZS> ListarInsumos()
@@ -127,13 +153,20 @@ namespace BLL.PN1
             return hasta.Date.AddDays(1);
         }
 
-        public List<Atencion_33ZS> ConsultarPropias(DateTime desde, DateTime hasta)
+        public ResumenAtenciones_33ZS ConsultarPropias(DateTime desde, DateTime hasta)
         {
             Usuario_33ZS usuario = Exigir("ConsultarAtencionesPropias");
-            return mapper.AtencionesPropias(usuario.DNI_33ZS, desde.Date, HastaExclusivo(desde, hasta));
+            var atenciones = mapper.AtencionesPropias(usuario.DNI_33ZS, desde.Date,
+                HastaExclusivo(desde, hasta));
+            return new ResumenAtenciones_33ZS
+            {
+                Atenciones = atenciones,
+                Cantidad = atenciones.Count,
+                Comisiones = atenciones.Sum(a => a.Comision)
+            };
         }
 
-        public List<Atencion_33ZS> ConsultarReporte(DateTime desde, DateTime hasta,
+        public ResumenAtenciones_33ZS ConsultarReporte(DateTime desde, DateTime hasta,
             string barberoDni = null, int? servicioId = null, int? medioPagoId = null)
         {
             Exigir("ConsultarAtencionesGenerales");

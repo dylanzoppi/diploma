@@ -11,10 +11,8 @@ namespace TpIngSoftware.PN1
         private readonly PN1BLL_33ZS negocio = new PN1BLL_33ZS();
         private readonly DataGridView servicios = EstiloPN1_33ZS.Tabla();
         private readonly DataGridView insumos = EstiloPN1_33ZS.Tabla();
-        private readonly NumericUpDown precio = Numero();
         private readonly NumericUpDown stock = Numero();
         private readonly NumericUpDown minimo = Numero();
-        private readonly CheckBox servicioActivo = new CheckBox { Text = EstiloPN1_33ZS.T("Disponible", "Available"), Checked = true, AutoSize = true };
         private readonly TextBox motivo = EstiloPN1_33ZS.Entrada(260);
         private readonly Label consumo = new Label { AutoSize = true };
 
@@ -45,12 +43,12 @@ namespace TpIngSoftware.PN1
             ps.Controls.Add(servicios, 0, 0);
             ps.Controls.Add(consumo, 0, 1);
             var filaServicio = EstiloPN1_33ZS.Fila();
-            filaServicio.Controls.Add(EstiloPN1_33ZS.Etiqueta(EstiloPN1_33ZS.T("Precio", "Price")));
-            filaServicio.Controls.Add(precio);
-            filaServicio.Controls.Add(servicioActivo);
-            var guardarPrecio = EstiloPN1_33ZS.Boton(EstiloPN1_33ZS.T("Guardar servicio", "Save service"), true);
-            guardarPrecio.Click += (s, e) => GuardarServicio();
-            filaServicio.Controls.Add(guardarPrecio);
+            var nuevoServicio = EstiloPN1_33ZS.Boton(EstiloPN1_33ZS.T("Nuevo servicio", "New service"), true);
+            nuevoServicio.Click += (s, e) => EditarServicio(true);
+            filaServicio.Controls.Add(nuevoServicio);
+            var editarServicio = EstiloPN1_33ZS.Boton(EstiloPN1_33ZS.T("Editar precio e insumos", "Edit price and supplies"));
+            editarServicio.Click += (s, e) => EditarServicio(false);
+            filaServicio.Controls.Add(editarServicio);
             ps.Controls.Add(filaServicio, 0, 2);
             pestanas.TabPages.Add(paginaServicios);
 
@@ -79,12 +77,29 @@ namespace TpIngSoftware.PN1
             Shown += (s, e) => Cargar();
         }
 
-        private void Cargar()
+        private void Cargar(int? seleccionarServicioId = null)
         {
             try
             {
                 servicios.DataSource = negocio.ListarServicios();
                 insumos.DataSource = negocio.ListarInsumos();
+                if (servicios.Columns[nameof(Servicio_33ZS.Id)] != null)
+                    servicios.Columns[nameof(Servicio_33ZS.Id)].Visible = false;
+                if (servicios.Columns[nameof(Servicio_33ZS.Descripcion)] != null)
+                    servicios.Columns[nameof(Servicio_33ZS.Descripcion)].Visible = false;
+                if (servicios.Columns[nameof(Servicio_33ZS.Activo)] != null)
+                    servicios.Columns[nameof(Servicio_33ZS.Activo)].HeaderText =
+                        EstiloPN1_33ZS.T("Disponible", "Available");
+                if (seleccionarServicioId.HasValue)
+                    foreach (DataGridViewRow fila in servicios.Rows)
+                    {
+                        var item = fila.DataBoundItem as Servicio_33ZS;
+                        if (item != null && item.Id == seleccionarServicioId.Value)
+                        {
+                            servicios.CurrentCell = fila.Cells[nameof(Servicio_33ZS.Nombre)];
+                            break;
+                        }
+                    }
             }
             catch (Exception ex) { EstiloPN1_33ZS.Error(this, ex); }
         }
@@ -93,12 +108,13 @@ namespace TpIngSoftware.PN1
         {
             var s = servicios.CurrentRow?.DataBoundItem as Servicio_33ZS;
             if (s == null) return;
-            precio.Value = s.Precio ?? 0;
-            servicioActivo.Checked = s.Activo;
             try
             {
-                consumo.Text = EstiloPN1_33ZS.T("Consumo: ", "Usage: ") + string.Join(" · ",
-                    negocio.ListarConsumos(s.Id).Select(c => c.Insumo + " " + c.Cantidad.ToString("N2")));
+                var consumos = negocio.ListarConsumos(s.Id);
+                consumo.Text = consumos.Count == 0
+                    ? EstiloPN1_33ZS.T("Sin insumos configurados", "No supplies configured")
+                    : EstiloPN1_33ZS.T("Consumo por atención: ", "Usage per service: ") +
+                        string.Join(" · ", consumos.Select(c => c.Insumo + " " + c.Cantidad.ToString("N2")));
             }
             catch (Exception ex) { EstiloPN1_33ZS.Error(this, ex); }
         }
@@ -111,14 +127,16 @@ namespace TpIngSoftware.PN1
             minimo.Value = i.StockMinimo;
         }
 
-        private void GuardarServicio()
+        private void EditarServicio(bool nuevo)
         {
             try
             {
-                var s = servicios.CurrentRow?.DataBoundItem as Servicio_33ZS;
-                if (s == null) throw new InvalidOperationException("Seleccioná un servicio.");
-                negocio.ActualizarPrecio(s.Id, precio.Value, servicioActivo.Checked);
-                Cargar();
+                var seleccionado = nuevo ? null : servicios.CurrentRow?.DataBoundItem as Servicio_33ZS;
+                if (!nuevo && seleccionado == null)
+                    throw new InvalidOperationException("Seleccioná un servicio para editar.");
+                using (var editor = new ServicioEditorForm_33ZS(seleccionado))
+                    if (editor.ShowDialog(this) == DialogResult.OK)
+                        Cargar(editor.ServicioId);
             }
             catch (Exception ex) { EstiloPN1_33ZS.Error(this, ex); }
         }

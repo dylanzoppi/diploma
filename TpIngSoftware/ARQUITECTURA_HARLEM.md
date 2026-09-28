@@ -25,6 +25,8 @@ Las contraseñas nuevas usan PBKDF2 con sal individual. El inicio de sesión rec
 
 Las migraciones y la inicialización de la base permanecen en `Servicios/BaseDatos`. Las migraciones `002` a `004` cubren procedimientos de seguridad e intentos de acceso. `005` crea los puestos y patentes de PN1; `006` crea clientes, barberos, catálogo, stock y medios de pago; `007` crea las atenciones y cobros. Las escrituras usan transacción, `XACT_ABORT`, rollback y propagación de errores. La BLL agrupa el cambio, el cálculo de DV y el evento de bitácora de usuarios y perfiles en una transacción de aplicación. En una base nueva, el formulario inicial o las variables de entorno aportan las contraseñas para un administrador, una recepcionista y un barbero de ejemplo. Las tres altas se confirman juntas; el repositorio no contiene claves iniciales conocidas. La conexión se configura en `App.config`, con posibilidad de sustituirla mediante `TPINGSOFTWARE_CONNECTION_STRING` durante pruebas. Las operaciones de respaldo y restauración siguen siendo comandos de instancia en DAL.
 
+La migración `008` agrega el guardado transaccional de servicios y cantidades fijas de insumos. La disponibilidad previa se evalúa en BLL con datos del catálogo, y el SP de atención vuelve a comprobar el stock dentro de la transacción. El reporte entrega cantidad, ingresos y comisiones desde el SP mediante mapper y BLL, sin calcular los totales en la pantalla.
+
 PN1 ya tiene flujo funcional presencial y tablas propias. PN2 (compras y reposición de insumos) todavía no está implementado.
 
 `MapperBase_33ZS`, `MappingHandler_33ZS` y `ResultadoOperacion_33ZS` están definidos como apoyo para mappers, pero las operaciones existentes todavía no los utilizan. Su presencia no demuestra por sí sola que el recorrido de datos esté alineado.
@@ -50,7 +52,7 @@ BE/PN1/ModelosPN1_33ZS.cs
 BLL/PN1/PN1BLL_33ZS.cs
 Mappers/PN1/PN1Mapper_33ZS.cs
 DAL/PN1/PN1DataAccess_33ZS.cs
-Servicios/BaseDatos/Migraciones/005_RolesPN1.sql ... 007_AtencionesPN1.sql
+Servicios/BaseDatos/Migraciones/005_RolesPN1.sql ... 008_CatalogoServiciosPN1.sql
 TpIngSoftware/PN1/*Form_33ZS.cs
 ```
 

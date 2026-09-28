@@ -39,9 +39,18 @@ namespace DAL.PN1
         public DataTable ListarConsumos(int servicioId) =>
             Tabla("dbo.Servicio_Consumos_33ZS", P("@ServicioID", servicioId));
 
-        public void ActualizarPrecio(int servicioId, decimal precio, bool activo) =>
-            acceso.ExecuteNonQuery_33ZS("dbo.Servicio_ActualizarPrecio_33ZS",
-                new[] { P("@ServicioID", servicioId), P("@Precio", precio), P("@Activo", activo) });
+        public int GuardarServicio(int? servicioId, string nombre, decimal precio,
+            bool activo, DataTable consumos)
+        {
+            var parametroConsumos = new SqlParameter("@Consumos", SqlDbType.Structured)
+            {
+                TypeName = "dbo.ConsumosServicio_33ZS",
+                Value = consumos
+            };
+            return Convert.ToInt32(acceso.ExecuteScalar_33ZS("dbo.Servicio_Guardar_33ZS",
+                new[] { P("@ServicioID", servicioId), P("@Nombre", nombre),
+                    P("@Precio", precio), P("@Activo", activo), parametroConsumos }));
+        }
 
         public DataTable ListarInsumos() => Tabla("dbo.Insumo_Listar_33ZS");
 

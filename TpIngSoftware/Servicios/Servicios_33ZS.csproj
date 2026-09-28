@@ -67,6 +67,7 @@
     <EmbeddedResource Include="BaseDatos\Migraciones\005_RolesPN1.sql" />
     <EmbeddedResource Include="BaseDatos\Migraciones\006_DatosPN1.sql" />
     <EmbeddedResource Include="BaseDatos\Migraciones\007_AtencionesPN1.sql" />
+    <EmbeddedResource Include="BaseDatos\Migraciones\008_CatalogoServiciosPN1.sql" />
     <EmbeddedResource Include="BaseDatos\QueryCargarDatosIniciales.sql" />
   </ItemGroup>
   <ItemGroup>

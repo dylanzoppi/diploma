@@ -62,13 +62,23 @@ namespace Mappers.PN1
         public List<Consumo_33ZS> ListarConsumos(int servicioId) =>
             Mapear(data.ListarConsumos(servicioId), r => new Consumo_33ZS
             {
+                InsumoId = Convert.ToInt32(r["InsumoID"]),
                 Insumo = r["Nombre"].ToString(),
                 Cantidad = Convert.ToDecimal(r["Cantidad"]),
-                Stock = Convert.ToDecimal(r["Stock"])
+                Stock = Convert.ToDecimal(r["Stock"]),
+                Activo = Convert.ToBoolean(r["Activo"])
             });
 
-        public void ActualizarPrecio(int servicioId, decimal precio, bool activo) =>
-            data.ActualizarPrecio(servicioId, precio, activo);
+        public int GuardarServicio(int? servicioId, string nombre, decimal precio,
+            bool activo, List<ConsumoServicio_33ZS> consumos)
+        {
+            var tabla = new DataTable();
+            tabla.Columns.Add("InsumoID", typeof(int));
+            tabla.Columns.Add("Cantidad", typeof(decimal));
+            foreach (var consumo in consumos)
+                tabla.Rows.Add(consumo.InsumoId, consumo.Cantidad);
+            return data.GuardarServicio(servicioId, nombre, precio, activo, tabla);
+        }
 
         public List<Insumo_33ZS> ListarInsumos() =>
             Mapear(data.ListarInsumos(), r => new Insumo_33ZS
@@ -106,10 +116,15 @@ namespace Mappers.PN1
                 Comision = Convert.ToDecimal(r["ComisionImporte"])
             });
 
-        public List<Atencion_33ZS> Reporte(DateTime desde, DateTime hastaExclusivo,
+        public ResumenAtenciones_33ZS Reporte(DateTime desde, DateTime hastaExclusivo,
             string barberoDni, int? servicioId, int? medioPagoId) =>
-            Mapear(data.Reporte(desde, hastaExclusivo, barberoDni, servicioId, medioPagoId),
-                r => new Atencion_33ZS
+            MapearReporte(data.Reporte(desde, hastaExclusivo, barberoDni, servicioId, medioPagoId));
+
+        private static ResumenAtenciones_33ZS MapearReporte(DataTable tabla)
+        {
+            var resultado = new ResumenAtenciones_33ZS
+            {
+                Atenciones = Mapear(tabla, r => new Atencion_33ZS
                 {
                     Id = Convert.ToInt32(r["AtencionID"]),
                     FechaHora = Convert.ToDateTime(r["FechaHora"]),
@@ -119,6 +134,15 @@ namespace Mappers.PN1
                     MedioPago = r["MedioPago"].ToString(),
                     Importe = Convert.ToDecimal(r["Importe"]),
                     Comision = Convert.ToDecimal(r["ComisionImporte"])
-                });
+                })
+            };
+            if (tabla.Rows.Count > 0)
+            {
+                resultado.Cantidad = Convert.ToInt32(tabla.Rows[0]["CantidadTotal"]);
+                resultado.Ingresos = Convert.ToDecimal(tabla.Rows[0]["IngresosTotales"]);
+                resultado.Comisiones = Convert.ToDecimal(tabla.Rows[0]["ComisionesTotales"]);
+            }
+            return resultado;
+        }
     }
 }

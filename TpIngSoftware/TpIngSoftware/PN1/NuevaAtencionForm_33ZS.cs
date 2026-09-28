@@ -25,7 +25,8 @@ namespace TpIngSoftware.PN1
 
         private static ComboBox Lista() => new ComboBox
         {
-            Width = 290, DropDownStyle = ComboBoxStyle.DropDownList
+            Width = 240, DropDownWidth = 320,
+            DropDownStyle = ComboBoxStyle.DropDownList
         };
 
         public NuevaAtencionForm_33ZS()
@@ -98,18 +99,41 @@ namespace TpIngSoftware.PN1
         private void ServicioSeleccionado()
         {
             var servicio = servicios.SelectedItem as Servicio_33ZS;
-            if (servicio == null) return;
+            guardar.Enabled = false;
+            if (servicio == null)
+            {
+                precioTexto.Text = "";
+                consumoTexto.Text = "";
+                return;
+            }
             importe.Value = servicio.Precio ?? 0;
             precioTexto.Text = EstiloPN1_33ZS.T("Precio vigente: $", "Current price: $") + servicio.Precio.Value.ToString("N2");
             try
             {
-                var consumos = negocio.ListarConsumos(servicio.Id);
-                consumoTexto.Text = consumos.Count == 0
-                    ? EstiloPN1_33ZS.T("Sin insumos asociados", "No supplies configured")
-                    : EstiloPN1_33ZS.T("Consumo previsto: ", "Expected usage: ") + string.Join(" · ", consumos.Select(c =>
+                var disponibilidad = negocio.EvaluarDisponibilidadServicio(servicio.Id);
+                string detalle = disponibilidad.Consumos.Count == 0
+                    ? EstiloPN1_33ZS.T("Servicio sin insumos configurados.", "No supplies configured for this service.")
+                    : EstiloPN1_33ZS.T("Consumo previsto: ", "Expected usage: ") + string.Join(" · ", disponibilidad.Consumos.Select(c =>
                         c.Insumo + " " + c.Cantidad.ToString("N2") + " (stock " + c.Stock.ToString("N2") + ")"));
+                consumoTexto.Text = disponibilidad.Disponible
+                    ? detalle + Environment.NewLine + EstiloPN1_33ZS.T("Stock suficiente para esta atención.", "Enough stock for this service.")
+                    : detalle + Environment.NewLine + TextoNoDisponibles(disponibilidad);
+                consumoTexto.ForeColor = disponibilidad.Disponible
+                    ? EstiloPantallas_33ZS.Tinta : EstiloPantallas_33ZS.Advertencia;
+                guardar.Enabled = disponibilidad.Disponible;
             }
             catch (Exception ex) { EstiloPN1_33ZS.Error(this, ex); }
+        }
+
+        private static string TextoNoDisponibles(DisponibilidadServicio_33ZS disponibilidad)
+        {
+            if (disponibilidad.Consumos.Count == 0)
+                return EstiloPN1_33ZS.T("Configurá los insumos antes de realizar el servicio.",
+                    "Configure supplies before performing this service.");
+            return EstiloPN1_33ZS.T("No realizar el servicio: ", "Do not perform the service: ") +
+                string.Join(" · ", disponibilidad.NoDisponibles.Select(c => c.Activo
+                    ? c.Insumo + EstiloPN1_33ZS.T(" (faltan ", " (missing ") + c.Faltante.ToString("N2") + ")"
+                    : c.Insumo + EstiloPN1_33ZS.T(" (inactivo)", " (inactive)")));
         }
 
         private void Registrar()
@@ -121,10 +145,23 @@ namespace TpIngSoftware.PN1
                 var medio = medios.SelectedItem as MedioPago_33ZS;
                 if (cliente == null || barbero == null || servicio == null || medio == null)
                     throw new InvalidOperationException("Seleccioná cliente, barbero, servicio y medio de pago.");
+                var disponibilidad = negocio.EvaluarDisponibilidadServicio(servicio.Id);
+                if (!disponibilidad.Disponible)
+                {
+                    ServicioSeleccionado();
+                    throw new InvalidOperationException(TextoNoDisponibles(disponibilidad));
+                }
                 guardar.Enabled = false;
                 int id = negocio.RegistrarAtencion(operacionId, cliente.Id, barbero.Dni,
                     servicio.Id, medio.Id, importe.Value);
-                MessageBox.Show(this, EstiloPN1_33ZS.T("Atención y cobro registrados. N.º ", "Service and payment recorded. No. ") + id,
+                MessageBox.Show(this,
+                    EstiloPN1_33ZS.T("Atención y cobro registrados.", "Service and payment recorded.") +
+                    Environment.NewLine + EstiloPN1_33ZS.T("N.º ", "No. ") + id +
+                    Environment.NewLine + EstiloPN1_33ZS.T("Cliente: ", "Customer: ") + cliente.Descripcion +
+                    Environment.NewLine + EstiloPN1_33ZS.T("Barbero: ", "Barber: ") + barbero.Descripcion +
+                    Environment.NewLine + EstiloPN1_33ZS.T("Servicio: ", "Service: ") + servicio.Nombre +
+                    Environment.NewLine + EstiloPN1_33ZS.T("Cobrado: $", "Paid: $") + importe.Value.ToString("N2") +
+                    Environment.NewLine + EstiloPN1_33ZS.T("Medio: ", "Method: ") + medio.Nombre,
                     "Harlem", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 operacionId = Guid.NewGuid();
                 cliente = null;
@@ -132,7 +169,7 @@ namespace TpIngSoftware.PN1
                 Cargar();
             }
             catch (Exception ex) { EstiloPN1_33ZS.Error(this, ex); }
-            finally { guardar.Enabled = true; }
+            finally { ServicioSeleccionado(); }
         }
     }
 }

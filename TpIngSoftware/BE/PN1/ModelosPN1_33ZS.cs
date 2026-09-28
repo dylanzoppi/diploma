@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 
 namespace BE.PN1
 {
@@ -45,9 +46,31 @@ namespace BE.PN1
 
     public sealed class Consumo_33ZS
     {
+        public int InsumoId { get; set; }
         public string Insumo { get; set; }
         public decimal Cantidad { get; set; }
         public decimal Stock { get; set; }
+        public bool Activo { get; set; }
+    }
+
+    public sealed class ConsumoServicio_33ZS
+    {
+        public int InsumoId { get; set; }
+        public decimal Cantidad { get; set; }
+    }
+
+    public sealed class DisponibilidadServicio_33ZS
+    {
+        public List<Consumo_33ZS> Consumos { get; set; } = new List<Consumo_33ZS>();
+        public List<FaltanteInsumo_33ZS> NoDisponibles { get; set; } = new List<FaltanteInsumo_33ZS>();
+        public bool Disponible => Consumos.Count > 0 && NoDisponibles.Count == 0;
+    }
+
+    public sealed class FaltanteInsumo_33ZS
+    {
+        public string Insumo { get; set; }
+        public decimal Faltante { get; set; }
+        public bool Activo { get; set; }
     }
 
     public sealed class MedioPago_33ZS
@@ -68,5 +91,13 @@ namespace BE.PN1
         public decimal Importe { get; set; }
         public decimal PorcentajeComision { get; set; }
         public decimal Comision { get; set; }
+    }
+
+    public sealed class ResumenAtenciones_33ZS
+    {
+        public List<Atencion_33ZS> Atenciones { get; set; } = new List<Atencion_33ZS>();
+        public int Cantidad { get; set; }
+        public decimal Ingresos { get; set; }
+        public decimal Comisiones { get; set; }
     }
 }

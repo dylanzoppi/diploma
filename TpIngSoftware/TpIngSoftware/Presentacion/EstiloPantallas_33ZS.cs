@@ -10,6 +10,7 @@ namespace TpIngSoftware
         internal static readonly Color Acento = Color.FromArgb(127, 79, 50);
         internal static readonly Color Secundario = Color.FromArgb(99, 103, 104);
         internal static readonly Color Borde = Color.FromArgb(223, 218, 211);
+        internal static readonly Color Advertencia = Color.FromArgb(155, 57, 46);
         internal static readonly Color Superficie = Color.White;
 
         internal static void Formulario(Form formulario, int ancho, int alto, int minimoAncho, int minimoAlto)
