@@ -22,7 +22,8 @@ namespace Servicios
             new Migracion_33ZS("009_PermisosAtencionesPN1", "009_PermisosAtencionesPN1.sql"),
             new Migracion_33ZS("010_CargaDemo", "010_CargaDemo.sql"),
             new Migracion_33ZS("011_ConsultaStockRecepcion", "011_ConsultaStockRecepcion.sql"),
-            new Migracion_33ZS("012_HistorialPropioSinPrecio", "012_HistorialPropioSinPrecio.sql")
+            new Migracion_33ZS("012_HistorialPropioSinPrecio", "012_HistorialPropioSinPrecio.sql"),
+            new Migracion_33ZS("013_PorcentajeComisionReporte", "013_PorcentajeComisionReporte.sql")
         };
 
         public static void AplicarMigraciones_33ZS()

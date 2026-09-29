@@ -134,6 +134,7 @@ namespace Mappers.PN1
                     Servicio = r["Servicio"].ToString(),
                     MedioPago = r["MedioPago"].ToString(),
                     Importe = Convert.ToDecimal(r["Importe"]),
+                    PorcentajeComision = Convert.ToDecimal(r["PorcentajeComisionAplicado"]),
                     Comision = Convert.ToDecimal(r["ComisionImporte"])
                 })
             };
