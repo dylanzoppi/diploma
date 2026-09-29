@@ -17,7 +17,7 @@ namespace TpIngSoftware.PN1
         private readonly ComboBox medios = Lista();
         private readonly NumericUpDown importe = new NumericUpDown
         {
-            Width = 150, DecimalPlaces = 2, Maximum = 1000000, ThousandsSeparator = true
+            Width = 150, DecimalPlaces = 2, Maximum = 9999999999.99m, ThousandsSeparator = true
         };
         private readonly Button guardar = EstiloPN1_33ZS.Boton(EstiloPN1_33ZS.T("Registrar atención y cobro", "Record service and payment"), true);
         private Cliente_33ZS cliente;
@@ -106,10 +106,10 @@ namespace TpIngSoftware.PN1
                 consumoTexto.Text = "";
                 return;
             }
-            importe.Value = servicio.Precio ?? 0;
-            precioTexto.Text = EstiloPN1_33ZS.T("Precio vigente: $", "Current price: $") + servicio.Precio.Value.ToString("N2");
             try
             {
+                importe.Value = servicio.Precio ?? 0;
+                precioTexto.Text = EstiloPN1_33ZS.T("Precio vigente: $", "Current price: $") + servicio.Precio.Value.ToString("N2");
                 var disponibilidad = negocio.EvaluarDisponibilidadServicio(servicio.Id);
                 string detalle = disponibilidad.Consumos.Count == 0
                     ? EstiloPN1_33ZS.T("Servicio sin insumos configurados.", "No supplies configured for this service.")
