@@ -13,6 +13,8 @@ namespace Mappers.PN1
         public bool DvPendiente() => data.DvPendiente();
         public bool HayUsuarios() => data.HayUsuarios();
         public void ConfirmarDv() => data.ConfirmarDv();
+        public bool CargaDemoPendiente() => data.CargaDemoPendiente();
+        public void ConfirmarCargaDemo() => data.ConfirmarCargaDemo();
 
         private static List<T> Mapear<T>(DataTable table, Func<DataRow, T> mapear)
         {

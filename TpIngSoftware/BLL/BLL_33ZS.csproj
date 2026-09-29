@@ -52,6 +52,7 @@
     <Compile Include="Usuarios\UsuarioBLL_33ZS.cs" />
     <Compile Include="PN1\PN1BLL_33ZS.cs" />
     <Compile Include="PN1\PN1Inicializacion_33ZS.cs" />
+    <Compile Include="PN1\CargaDemo_33ZS.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\BE\BE_33ZS.csproj">

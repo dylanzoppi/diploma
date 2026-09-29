@@ -37,6 +37,8 @@ namespace TpIngSoftware
                     }
                 }
 
+                CargaDemo_33ZS.Aplicar_33ZS();
+
             }
             catch (Exception ex)
             {

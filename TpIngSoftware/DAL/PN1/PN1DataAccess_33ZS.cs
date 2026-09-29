@@ -21,6 +21,12 @@ namespace DAL.PN1
         public void ConfirmarDv() =>
             acceso.ExecuteNonQuery_33ZS("dbo.PN1_ConfirmarDV_33ZS");
 
+        public bool CargaDemoPendiente() =>
+            Convert.ToBoolean(acceso.ExecuteScalar_33ZS("dbo.CargaDemo_Pendiente_33ZS"));
+
+        public void ConfirmarCargaDemo() =>
+            acceso.ExecuteNonQuery_33ZS("dbo.CargaDemo_Confirmar_33ZS");
+
         public DataTable BuscarClientes(string termino) =>
             Tabla("dbo.Cliente_Buscar_33ZS", P("@Termino", termino));
 

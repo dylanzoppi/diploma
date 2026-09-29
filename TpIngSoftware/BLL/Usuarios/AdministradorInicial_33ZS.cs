@@ -6,9 +6,6 @@ namespace BLL
 {
     public static class AdministradorInicial_33ZS
     {
-        public const string EmailDemoUno_33ZS = "demo1@harlem.local";
-        public const string EmailDemoDos_33ZS = "demo2@harlem.local";
-
         public static bool RequiereConfiguracion_33ZS()
         {
             return new UsuarioBLL_33ZS().ObtenerUsuarios_33ZS().Count == 0;
@@ -24,35 +21,30 @@ namespace BLL
             string apellidos = Environment.GetEnvironmentVariable("TPINGSOFTWARE_ADMIN_APELLIDOS");
             string email = Environment.GetEnvironmentVariable("TPINGSOFTWARE_ADMIN_EMAIL");
             string claveAdmin = Environment.GetEnvironmentVariable("TPINGSOFTWARE_ADMIN_PASSWORD");
-            string claveDemo = Environment.GetEnvironmentVariable("TPINGSOFTWARE_DEMO_PASSWORD");
-
             if (string.IsNullOrWhiteSpace(dni) || string.IsNullOrWhiteSpace(nombre) ||
                 string.IsNullOrWhiteSpace(apellidos) || string.IsNullOrWhiteSpace(email) ||
-                string.IsNullOrWhiteSpace(claveAdmin) || string.IsNullOrWhiteSpace(claveDemo))
+                string.IsNullOrWhiteSpace(claveAdmin))
                 return false;
 
             try
             {
-                CrearCuentas_33ZS(dni, nombre, apellidos, email, claveAdmin, claveDemo);
+                CrearCuenta_33ZS(dni, nombre, apellidos, email, claveAdmin);
                 return true;
             }
             finally
             {
                 Environment.SetEnvironmentVariable("TPINGSOFTWARE_ADMIN_PASSWORD", null,
                     EnvironmentVariableTarget.Process);
-                Environment.SetEnvironmentVariable("TPINGSOFTWARE_DEMO_PASSWORD", null,
-                    EnvironmentVariableTarget.Process);
             }
         }
 
-        public static void CrearCuentas_33ZS(string dni, string nombre, string apellidos,
-            string email, string claveAdmin, string claveDemo)
+        public static void CrearCuenta_33ZS(string dni, string nombre, string apellidos,
+            string email, string claveAdmin)
         {
             if (!RequiereConfiguracion_33ZS())
                 throw new InvalidOperationException("La base ya tiene usuarios.");
 
             ValidarClave_33ZS(claveAdmin, "administrador");
-            ValidarClave_33ZS(claveDemo, "demostración");
 
             UsuarioBLL_33ZS usuarios = new UsuarioBLL_33ZS();
             MapperTransaction_33ZS.Ejecutar_33ZS(() =>
@@ -60,12 +52,6 @@ namespace BLL
                 new DigitoVerificadorBLL_33ZS().GenerarTodo_33ZS();
                 usuarios.AgregarUsuarioInicial_33ZS(new Usuario_33ZS(
                     dni, apellidos, nombre, email, claveAdmin, "Administrador", email));
-                usuarios.AgregarUsuarioInicial_33ZS(new Usuario_33ZS(
-                    "90000001", "Ejemplo", "Demo Uno", EmailDemoUno_33ZS,
-                    claveDemo, "Recepcionista", EmailDemoUno_33ZS));
-                usuarios.AgregarUsuarioInicial_33ZS(new Usuario_33ZS(
-                    "90000002", "Ejemplo", "Demo Dos", EmailDemoDos_33ZS,
-                    claveDemo, "Barbero", EmailDemoDos_33ZS));
             });
         }
 

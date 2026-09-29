@@ -12,7 +12,6 @@ namespace TpIngSoftware
         private readonly TextBox apellidos = new TextBox();
         private readonly TextBox email = new TextBox();
         private readonly TextBox claveAdmin = new TextBox();
-        private readonly TextBox claveDemo = new TextBox();
         private readonly Label error = new Label();
 
         public ConfiguracionInicial33ZS()
@@ -31,7 +30,7 @@ namespace TpIngSoftware
                 Padding = new Padding(28),
                 BackColor = EstiloPantallas_33ZS.Superficie,
                 ColumnCount = 2,
-                RowCount = 11
+                RowCount = 10
             };
             tabla.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 225));
             tabla.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100));
@@ -52,8 +51,8 @@ namespace TpIngSoftware
 
             var descripcion = new Label
             {
-                Text = "Creá el administrador para esta instalación. También se crearán dos " +
-                       "cuentas de ejemplo: una Recepcionista y un Barbero. Elegí sus contraseñas antes de continuar.",
+                Text = "Creá el administrador para esta instalación. Al continuar se cargarán " +
+                       "cuentas y clientes de demostración con las credenciales indicadas en el README.",
                 AutoSize = true,
                 MaximumSize = new Size(670, 0),
                 ForeColor = EstiloPantallas_33ZS.Secundario,
@@ -67,27 +66,24 @@ namespace TpIngSoftware
             AgregarCampo_33ZS(tabla, "Apellido", apellidos, 4);
             AgregarCampo_33ZS(tabla, "Email / usuario", email, 5);
             AgregarCampo_33ZS(tabla, "Clave del administrador", claveAdmin, 6);
-            AgregarCampo_33ZS(tabla, "Clave de las cuentas demo", claveDemo, 7);
             claveAdmin.UseSystemPasswordChar = true;
-            claveDemo.UseSystemPasswordChar = true;
 
             var cuentasDemo = new Label
             {
-                Text = "Cuentas de ejemplo: " + AdministradorInicial_33ZS.EmailDemoUno_33ZS +
-                       " (Recepcionista) y " + AdministradorInicial_33ZS.EmailDemoDos_33ZS +
-                       " (Barbero). Ambas usarán la clave demo que ingreses. Cada clave debe tener de 12 a 50 caracteres.",
+                Text = "La clave del administrador debe tener entre 12 y 50 caracteres. " +
+                       "Las cuentas de demostración se cargan al terminar esta configuración.",
                 AutoSize = true,
                 MaximumSize = new Size(670, 0),
                 ForeColor = EstiloPantallas_33ZS.Secundario,
                 Margin = new Padding(0, 10, 0, 10)
             };
-            tabla.Controls.Add(cuentasDemo, 0, 8);
+            tabla.Controls.Add(cuentasDemo, 0, 7);
             tabla.SetColumnSpan(cuentasDemo, 2);
 
             error.ForeColor = Color.FromArgb(155, 57, 46);
             error.AutoSize = true;
             error.MaximumSize = new Size(670, 0);
-            tabla.Controls.Add(error, 0, 9);
+            tabla.Controls.Add(error, 0, 8);
             tabla.SetColumnSpan(error, 2);
 
             var botones = new FlowLayoutPanel
@@ -104,7 +100,7 @@ namespace TpIngSoftware
             cancelar.Click += (sender, args) => { DialogResult = DialogResult.Cancel; Close(); };
             botones.Controls.Add(crear);
             botones.Controls.Add(cancelar);
-            tabla.Controls.Add(botones, 0, 10);
+            tabla.Controls.Add(botones, 0, 9);
             tabla.SetColumnSpan(botones, 2);
             AcceptButton = crear;
             CancelButton = cancelar;
@@ -132,12 +128,11 @@ namespace TpIngSoftware
             error.Text = string.Empty;
             try
             {
-                AdministradorInicial_33ZS.CrearCuentas_33ZS(
+                AdministradorInicial_33ZS.CrearCuenta_33ZS(
                     dni.Text, nombre.Text, apellidos.Text, email.Text,
-                    claveAdmin.Text, claveDemo.Text);
+                    claveAdmin.Text);
                 MessageBox.Show(this,
-                    "Se crearon el administrador y las dos cuentas de ejemplo. " +
-                    "Usá el email y las contraseñas que acabás de elegir para iniciar sesión.",
+                    "Se creó el administrador. Al continuar se cargarán las cuentas y clientes de demostración.",
                     "Instalación completada", MessageBoxButtons.OK,
                     MessageBoxIcon.Information);
                 DialogResult = DialogResult.OK;
