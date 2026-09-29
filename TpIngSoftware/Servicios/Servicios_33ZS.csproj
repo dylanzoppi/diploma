@@ -71,6 +71,7 @@
     <EmbeddedResource Include="BaseDatos\Migraciones\009_PermisosAtencionesPN1.sql" />
     <EmbeddedResource Include="BaseDatos\Migraciones\010_CargaDemo.sql" />
     <EmbeddedResource Include="BaseDatos\Migraciones\011_ConsultaStockRecepcion.sql" />
+    <EmbeddedResource Include="BaseDatos\Migraciones\012_HistorialPropioSinPrecio.sql" />
     <EmbeddedResource Include="BaseDatos\QueryCargarDatosIniciales.sql" />
   </ItemGroup>
   <ItemGroup>

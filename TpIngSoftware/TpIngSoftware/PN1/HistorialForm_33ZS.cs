@@ -107,25 +107,26 @@ namespace TpIngSoftware.PN1
                 int? servicioId = servicio == null || servicio.Id == 0 ? (int?)null : servicio.Id;
                 int? medioId = medio == null || medio.Id == 0 ? (int?)null : medio.Id;
                 // La lectura se hace en un hilo de trabajo; los controles se actualizan al volver al hilo de UI.
-                ResumenAtenciones_33ZS resultado = await Task.Run(() => general
-                    ? negocio.ConsultarReporte(fechaDesde, fechaHasta, dni, servicioId, medioId)
-                    : negocio.ConsultarPropias(fechaDesde, fechaHasta));
-                tabla.DataSource = resultado.Atenciones;
-                if (!general)
+                if (general)
                 {
-                    foreach (string columna in new[] { nameof(Atencion_33ZS.Cliente),
-                        nameof(Atencion_33ZS.Barbero), nameof(Atencion_33ZS.MedioPago),
-                        nameof(Atencion_33ZS.Importe) })
-                        if (tabla.Columns[columna] != null)
-                            tabla.Columns[columna].Visible = false;
-                }
-                resumen.Text = general
-                    ? string.Format(EstiloPN1_33ZS.T("{0} atenciones · Cobrado: ${1:N2} · Comisiones: ${2:N2}",
+                    ResumenAtenciones_33ZS resultado = await Task.Run(() =>
+                        negocio.ConsultarReporte(fechaDesde, fechaHasta, dni, servicioId, medioId));
+                    tabla.DataSource = resultado.Atenciones;
+                    resumen.Text = string.Format(EstiloPN1_33ZS.T(
+                        "{0} atenciones · Cobrado: ${1:N2} · Comisiones: ${2:N2}",
                         "{0} services · Collected: ${1:N2} · Commissions: ${2:N2}"),
-                        resultado.Cantidad, resultado.Ingresos, resultado.Comisiones)
-                    : string.Format(EstiloPN1_33ZS.T("{0} atenciones · Mi comisión: ${1:N2}",
+                        resultado.Cantidad, resultado.Ingresos, resultado.Comisiones);
+                }
+                else
+                {
+                    ResumenAtencionesPropias_33ZS resultado = await Task.Run(() =>
+                        negocio.ConsultarPropias(fechaDesde, fechaHasta));
+                    tabla.DataSource = resultado.Atenciones;
+                    resumen.Text = string.Format(EstiloPN1_33ZS.T(
+                        "{0} atenciones · Mi comisión: ${1:N2}",
                         "{0} services · My commission: ${1:N2}"),
                         resultado.Cantidad, resultado.Comisiones);
+                }
             }
             catch (Exception ex) { EstiloPN1_33ZS.Error(this, ex); }
             finally { consultar.Enabled = true; }

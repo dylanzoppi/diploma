@@ -153,12 +153,12 @@ namespace BLL.PN1
             return hasta.Date.AddDays(1);
         }
 
-        public ResumenAtenciones_33ZS ConsultarPropias(DateTime desde, DateTime hasta)
+        public ResumenAtencionesPropias_33ZS ConsultarPropias(DateTime desde, DateTime hasta)
         {
             Usuario_33ZS usuario = Exigir("ConsultarAtencionesPropias");
             var atenciones = mapper.AtencionesPropias(usuario.DNI_33ZS, desde.Date,
                 HastaExclusivo(desde, hasta));
-            return new ResumenAtenciones_33ZS
+            return new ResumenAtencionesPropias_33ZS
             {
                 Atenciones = atenciones,
                 Cantidad = atenciones.Count,

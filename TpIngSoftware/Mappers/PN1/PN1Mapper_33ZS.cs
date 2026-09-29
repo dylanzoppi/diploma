@@ -107,13 +107,12 @@ namespace Mappers.PN1
             data.RegistrarAtencion(operacionId, clienteId, barberoDni, recepcionistaDni,
                 servicioId, medioPagoId, importe);
 
-        public List<Atencion_33ZS> AtencionesPropias(string dni, DateTime desde, DateTime hastaExclusivo) =>
-            Mapear(data.AtencionesPropias(dni, desde, hastaExclusivo), r => new Atencion_33ZS
+        public List<AtencionPropia_33ZS> AtencionesPropias(string dni, DateTime desde, DateTime hastaExclusivo) =>
+            Mapear(data.AtencionesPropias(dni, desde, hastaExclusivo), r => new AtencionPropia_33ZS
             {
                 Id = Convert.ToInt32(r["AtencionID"]),
                 FechaHora = Convert.ToDateTime(r["FechaHora"]),
                 Servicio = r["Servicio"].ToString(),
-                Importe = Convert.ToDecimal(r["PrecioAplicado"]),
                 PorcentajeComision = Convert.ToDecimal(r["PorcentajeComisionAplicado"]),
                 Comision = Convert.ToDecimal(r["ComisionImporte"])
             });

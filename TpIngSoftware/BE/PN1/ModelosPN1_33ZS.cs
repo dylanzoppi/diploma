@@ -80,6 +80,22 @@ namespace BE.PN1
         public override string ToString() => Nombre;
     }
 
+    public sealed class AtencionPropia_33ZS
+    {
+        public int Id { get; set; }
+        public DateTime FechaHora { get; set; }
+        public string Servicio { get; set; }
+        public decimal PorcentajeComision { get; set; }
+        public decimal Comision { get; set; }
+    }
+
+    public sealed class ResumenAtencionesPropias_33ZS
+    {
+        public List<AtencionPropia_33ZS> Atenciones { get; set; } = new List<AtencionPropia_33ZS>();
+        public int Cantidad { get; set; }
+        public decimal Comisiones { get; set; }
+    }
+
     public sealed class Atencion_33ZS
     {
         public int Id { get; set; }
