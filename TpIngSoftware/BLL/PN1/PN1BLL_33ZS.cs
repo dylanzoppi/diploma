@@ -118,7 +118,7 @@ namespace BLL.PN1
 
         public List<Insumo_33ZS> ListarInsumos()
         {
-            Exigir("GestionarStock", "GestionarCatalogo");
+            Exigir("ConsultarStock", "GestionarStock", "GestionarCatalogo");
             return mapper.ListarInsumos();
         }
 

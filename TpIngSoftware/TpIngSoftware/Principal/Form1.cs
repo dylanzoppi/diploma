@@ -101,13 +101,16 @@ namespace TpIngSoftware
             AgregarConPatente(T("Barberos", "Barbers"), T("Configurar comisión y disponibilidad", "Set commission and availability"), "GestionarBarberos",
                 () => Abrir(new BarberosForm_33ZS()));
             bool puedeCatalogo = TienePatente("ConsultarCatalogo") || TienePatente("GestionarCatalogo");
-            bool puedeStock = TienePatente("GestionarStock");
+            bool puedeGestionarStock = TienePatente("GestionarStock");
+            bool puedeStock = puedeGestionarStock || TienePatente("ConsultarStock");
             if (puedeCatalogo || puedeStock)
                 Agregar(puedeCatalogo && puedeStock ? T("Catálogo y stock", "Services and stock")
                         : puedeCatalogo ? T("Catálogo", "Services") : T("Stock", "Stock"),
-                    puedeCatalogo && puedeStock ? T("Precios, insumos y existencias", "Prices, supplies and stock")
+                    puedeCatalogo && puedeGestionarStock ? T("Precios, insumos y existencias", "Prices, supplies and stock")
+                        : puedeCatalogo && puedeStock ? T("Consultar servicios y existencias", "View services and stock")
                         : puedeCatalogo ? T("Consultar servicios y precios", "View services and prices")
-                        : T("Gestionar existencias", "Manage stock"),
+                        : puedeGestionarStock ? T("Gestionar existencias", "Manage stock")
+                        : T("Consultar existencias", "View stock"),
                     () => Abrir(new CatalogoForm_33ZS()));
             if (TienePatente("AltaUsuario") || TienePatente("ModificacionUsuario") ||
                 TienePatente("BajaUsuario") || TienePatente("DesbloquearUsuario"))
