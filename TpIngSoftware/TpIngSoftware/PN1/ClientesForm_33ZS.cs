@@ -1,5 +1,4 @@
 using System;
-using System.Linq;
 using System.Windows.Forms;
 using BE.PN1;
 using BLL.PN1;
@@ -79,19 +78,21 @@ namespace TpIngSoftware.PN1
         {
             try
             {
-                int id = negocio.RegistrarCliente(new Cliente_33ZS
+                var nuevoCliente = new Cliente_33ZS
                 {
                     Nombre = nombre.Text, Apellido = apellido.Text,
                     Telefono = telefono.Text, Correo = correo.Text
-                });
-                buscar.Text = telefono.Text.Trim();
-                Cargar();
+                };
+                nuevoCliente.Id = negocio.RegistrarCliente(nuevoCliente);
                 if (modoSeleccion)
                 {
-                    ClienteSeleccionado = negocio.BuscarClientes(buscar.Text).First(c => c.Id == id);
+                    ClienteSeleccionado = nuevoCliente;
                     DialogResult = DialogResult.OK;
+                    return;
                 }
-                else MessageBox.Show(this, EstiloPN1_33ZS.T("Cliente registrado.", "Customer registered."), "Harlem");
+                buscar.Text = nuevoCliente.Telefono;
+                Cargar();
+                MessageBox.Show(this, EstiloPN1_33ZS.T("Cliente registrado.", "Customer registered."), "Harlem");
             }
             catch (Exception ex) { EstiloPN1_33ZS.Error(this, ex); }
         }
