@@ -15,6 +15,9 @@ namespace TpIngSoftware.PN1
         private readonly NumericUpDown minimo = Numero();
         private readonly TextBox motivo = EstiloPN1_33ZS.Entrada(260);
         private readonly Label consumo = new Label { AutoSize = true };
+        private readonly bool puedeVerCatalogo;
+        private readonly bool puedeGestionarCatalogo;
+        private readonly bool puedeGestionarStock;
 
         private static NumericUpDown Numero() => new NumericUpDown
         {
@@ -23,6 +26,9 @@ namespace TpIngSoftware.PN1
 
         public CatalogoForm_33ZS()
         {
+            puedeGestionarCatalogo = negocio.TienePermiso("GestionarCatalogo");
+            puedeVerCatalogo = puedeGestionarCatalogo || negocio.TienePermiso("ConsultarCatalogo");
+            puedeGestionarStock = negocio.TienePermiso("GestionarStock");
             EstiloPN1_33ZS.Preparar(this, EstiloPN1_33ZS.T("Catálogo y stock", "Services and stock"));
             var raiz = new TableLayoutPanel { Dock = DockStyle.Fill, Padding = new Padding(24),
                 ColumnCount = 1, RowCount = 2 };
@@ -44,13 +50,15 @@ namespace TpIngSoftware.PN1
             ps.Controls.Add(consumo, 0, 1);
             var filaServicio = EstiloPN1_33ZS.Fila();
             var nuevoServicio = EstiloPN1_33ZS.Boton(EstiloPN1_33ZS.T("Nuevo servicio", "New service"), true);
+            nuevoServicio.Visible = puedeGestionarCatalogo;
             nuevoServicio.Click += (s, e) => EditarServicio(true);
             filaServicio.Controls.Add(nuevoServicio);
             var editarServicio = EstiloPN1_33ZS.Boton(EstiloPN1_33ZS.T("Editar precio e insumos", "Edit price and supplies"));
+            editarServicio.Visible = puedeGestionarCatalogo;
             editarServicio.Click += (s, e) => EditarServicio(false);
             filaServicio.Controls.Add(editarServicio);
             ps.Controls.Add(filaServicio, 0, 2);
-            pestanas.TabPages.Add(paginaServicios);
+            if (puedeVerCatalogo) pestanas.TabPages.Add(paginaServicios);
 
             var paginaInsumos = new TabPage(EstiloPN1_33ZS.T("Stock", "Stock"));
             var pi = new TableLayoutPanel { Dock = DockStyle.Fill, Padding = new Padding(14),
@@ -70,7 +78,7 @@ namespace TpIngSoftware.PN1
             guardarStock.Click += (s, e) => GuardarStock();
             filaInsumo.Controls.Add(guardarStock);
             pi.Controls.Add(filaInsumo, 0, 1);
-            pestanas.TabPages.Add(paginaInsumos);
+            if (puedeGestionarStock) pestanas.TabPages.Add(paginaInsumos);
 
             servicios.SelectionChanged += (s, e) => ServicioSeleccionado();
             insumos.SelectionChanged += (s, e) => InsumoSeleccionado();
@@ -81,16 +89,16 @@ namespace TpIngSoftware.PN1
         {
             try
             {
-                servicios.DataSource = negocio.ListarServicios();
-                insumos.DataSource = negocio.ListarInsumos();
-                if (servicios.Columns[nameof(Servicio_33ZS.Id)] != null)
+                if (puedeVerCatalogo) servicios.DataSource = negocio.ListarServicios();
+                if (puedeGestionarStock) insumos.DataSource = negocio.ListarInsumos();
+                if (puedeVerCatalogo && servicios.Columns[nameof(Servicio_33ZS.Id)] != null)
                     servicios.Columns[nameof(Servicio_33ZS.Id)].Visible = false;
-                if (servicios.Columns[nameof(Servicio_33ZS.Descripcion)] != null)
+                if (puedeVerCatalogo && servicios.Columns[nameof(Servicio_33ZS.Descripcion)] != null)
                     servicios.Columns[nameof(Servicio_33ZS.Descripcion)].Visible = false;
-                if (servicios.Columns[nameof(Servicio_33ZS.Activo)] != null)
+                if (puedeVerCatalogo && servicios.Columns[nameof(Servicio_33ZS.Activo)] != null)
                     servicios.Columns[nameof(Servicio_33ZS.Activo)].HeaderText =
                         EstiloPN1_33ZS.T("Disponible", "Available");
-                if (seleccionarServicioId.HasValue)
+                if (puedeVerCatalogo && seleccionarServicioId.HasValue)
                     foreach (DataGridViewRow fila in servicios.Rows)
                     {
                         var item = fila.DataBoundItem as Servicio_33ZS;

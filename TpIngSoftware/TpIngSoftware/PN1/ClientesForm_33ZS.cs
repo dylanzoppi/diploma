@@ -45,6 +45,7 @@ namespace TpIngSoftware.PN1
             panel.Controls.Add(tabla, 0, 2);
 
             var alta = EstiloPN1_33ZS.Fila();
+            alta.Visible = negocio.TienePermiso("RegistrarCliente");
             alta.Controls.Add(EstiloPN1_33ZS.Etiqueta(EstiloPN1_33ZS.T("Nombre", "First name")));
             alta.Controls.Add(nombre);
             alta.Controls.Add(EstiloPN1_33ZS.Etiqueta(EstiloPN1_33ZS.T("Apellido", "Last name")));
@@ -57,6 +58,7 @@ namespace TpIngSoftware.PN1
 
             var acciones = EstiloPN1_33ZS.Fila();
             var guardar = EstiloPN1_33ZS.Boton(EstiloPN1_33ZS.T("Registrar cliente", "Register customer"), true);
+            guardar.Visible = alta.Visible;
             guardar.Click += (s, e) => Registrar();
             acciones.Controls.Add(guardar);
             seleccionar.Visible = modoSeleccion;

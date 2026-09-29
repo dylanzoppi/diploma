@@ -27,6 +27,8 @@ Las migraciones y la inicialización de la base permanecen en `Servicios/BaseDat
 
 La migración `008` agrega el guardado transaccional de servicios y cantidades fijas de insumos. La disponibilidad previa se evalúa en BLL con datos del catálogo, y el SP de atención vuelve a comprobar el stock dentro de la transacción. El reporte entrega cantidad, ingresos y comisiones desde el SP mediante mapper y BLL, sin calcular los totales en la pantalla.
 
+La migración `009` hace que el SP de atención compruebe `RegistrarAtencion` a partir del rol y sus patentes, incluidas las heredadas por familias anidadas. La BLL exige las patentes de usuarios y perfiles al ejecutar cambios, de bitácora al consultar eventos y de respaldos al copiar o restaurar; el alta inicial utiliza una ruta interna específica antes del primer inicio de sesión. Las pantallas de clientes y catálogo muestran sólo las acciones permitidas, y el reporte de ingresos permanece separado del historial propio del Barbero.
+
 PN1 ya tiene flujo funcional presencial y tablas propias. PN2 (compras y reposición de insumos) todavía no está implementado.
 
 `MapperBase_33ZS`, `MappingHandler_33ZS` y `ResultadoOperacion_33ZS` están definidos como apoyo para mappers, pero las operaciones existentes todavía no los utilizan. Su presencia no demuestra por sí sola que el recorrido de datos esté alineado.
@@ -52,7 +54,7 @@ BE/PN1/ModelosPN1_33ZS.cs
 BLL/PN1/PN1BLL_33ZS.cs
 Mappers/PN1/PN1Mapper_33ZS.cs
 DAL/PN1/PN1DataAccess_33ZS.cs
-Servicios/BaseDatos/Migraciones/005_RolesPN1.sql ... 008_CatalogoServiciosPN1.sql
+Servicios/BaseDatos/Migraciones/005_RolesPN1.sql ... 009_PermisosAtencionesPN1.sql
 TpIngSoftware/PN1/*Form_33ZS.cs
 ```
 

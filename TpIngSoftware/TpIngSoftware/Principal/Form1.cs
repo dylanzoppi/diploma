@@ -84,25 +84,35 @@ namespace TpIngSoftware
                 CultureInfo.GetCultureInfo(ingles ? "en-US" : "es-AR"));
             accesosTitulo.Text = T("ACCESOS DISPONIBLES", "AVAILABLE ACTIONS");
             claveBoton.Text = T("Cambiar contraseña", "Change password");
+            claveBoton.Visible = TienePatente("CambiarClave");
             salirBoton.Text = T("Cerrar sesión", "Sign out");
             navegacion.Controls.Clear();
             accesos.Controls.Clear();
             AgregarConPatente(T("Nueva atención", "New service"), T("Registrar servicio y cobro", "Record service and payment"), "RegistrarAtencion",
                 () => Abrir(new NuevaAtencionForm_33ZS()));
-            AgregarConPatente(T("Clientes", "Customers"), T("Buscar y registrar clientes", "Find and register customers"), "BuscarCliente",
+            AgregarConPatente(T("Clientes", "Customers"),
+                TienePatente("RegistrarCliente") ? T("Buscar y registrar clientes", "Find and register customers")
+                    : T("Consultar clientes", "View customers"), "BuscarCliente",
                 () => Abrir(new ClientesForm_33ZS()));
-            if (usuario.Rol_33ZS == "Barbero")
-                AgregarConPatente(T("Mi historial", "My history"), T("Ver mis servicios y comisiones", "View my services and commissions"), "ConsultarAtencionesPropias",
-                    () => Abrir(new HistorialForm_33ZS(false)));
+            AgregarConPatente(T("Mi historial", "My history"), T("Ver mis servicios y comisiones", "View my services and commissions"), "ConsultarAtencionesPropias",
+                () => Abrir(new HistorialForm_33ZS(false)));
             AgregarConPatente(T("Atenciones", "Services"), T("Consultar actividad del negocio", "View shop activity"), "ConsultarAtencionesGenerales",
                 () => Abrir(new HistorialForm_33ZS(true)));
             AgregarConPatente(T("Barberos", "Barbers"), T("Configurar comisión y disponibilidad", "Set commission and availability"), "GestionarBarberos",
                 () => Abrir(new BarberosForm_33ZS()));
-            AgregarConPatente(T("Catálogo y stock", "Services and stock"), T("Precios, insumos y existencias", "Prices, supplies and stock"), "GestionarCatalogo",
-                () => Abrir(new CatalogoForm_33ZS()));
-            if (TienePatente("AltaUsuario") || TienePatente("ModificacionUsuario"))
+            bool puedeCatalogo = TienePatente("ConsultarCatalogo") || TienePatente("GestionarCatalogo");
+            bool puedeStock = TienePatente("GestionarStock");
+            if (puedeCatalogo || puedeStock)
+                Agregar(puedeCatalogo && puedeStock ? T("Catálogo y stock", "Services and stock")
+                        : puedeCatalogo ? T("Catálogo", "Services") : T("Stock", "Stock"),
+                    puedeCatalogo && puedeStock ? T("Precios, insumos y existencias", "Prices, supplies and stock")
+                        : puedeCatalogo ? T("Consultar servicios y precios", "View services and prices")
+                        : T("Gestionar existencias", "Manage stock"),
+                    () => Abrir(new CatalogoForm_33ZS()));
+            if (TienePatente("AltaUsuario") || TienePatente("ModificacionUsuario") ||
+                TienePatente("BajaUsuario") || TienePatente("DesbloquearUsuario"))
                 Agregar(T("Usuarios", "Users"), T("Cuentas y roles", "Accounts and roles"), () => Abrir(new GestionUsuarios_33ZS()));
-            if (TienePatente("AltaPerfil") || TienePatente("ModificacionPerfil"))
+            if (TienePatente("AltaPerfil") || TienePatente("ModificacionPerfil") || TienePatente("BajaPerfil"))
                 Agregar(T("Perfiles", "Profiles"), T("Patentes y permisos", "Permissions"), () => Abrir(new GestionPerfiles_33ZS()));
             AgregarConPatente(T("Bitácora", "Event log"), T("Eventos de seguridad", "Security events"), "ConsultarBitacora",
                 () => Abrir(new BitacoraEventos33ZS()));

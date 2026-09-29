@@ -31,6 +31,15 @@ namespace BLL
 
         private static readonly int MaxIntentosLogin_33ZS = LeerMaxIntentosLogin_33ZS();
 
+        private void ExigirPatente_33ZS(string patente)
+        {
+            Usuario_33ZS actual = SessionManager_33ZS.HaySesionActiva_33ZS()
+                ? SessionManager_33ZS.GetInstance_33ZS().UsuarioActual_33ZS : null;
+            if (actual == null || !actual.Activo_33ZS || actual.Bloqueo_33ZS ||
+                !perfilBLL.RolTienePatente_33ZS(actual.Rol_33ZS, patente))
+                throw new UnauthorizedAccessException("Su rol no tiene permiso para esta operación.");
+        }
+
         private static void RestringirCuentaAdministrador_33ZS(string rol)
         {
             Usuario_33ZS actual = SessionManager_33ZS.HaySesionActiva_33ZS()
@@ -60,6 +69,17 @@ namespace BLL
         }
 
         public void AgregarUsuario_33ZS(Usuario_33ZS nuevoUsuario)
+        {
+            ExigirPatente_33ZS("AltaUsuario");
+            AgregarUsuarioCore_33ZS(nuevoUsuario);
+        }
+
+        internal void AgregarUsuarioInicial_33ZS(Usuario_33ZS nuevoUsuario)
+        {
+            AgregarUsuarioCore_33ZS(nuevoUsuario);
+        }
+
+        private void AgregarUsuarioCore_33ZS(Usuario_33ZS nuevoUsuario)
         {
             ValidarDatosBasicos_33ZS(nuevoUsuario);
             RestringirCuentaAdministrador_33ZS(nuevoUsuario.Rol_33ZS);
@@ -170,6 +190,7 @@ namespace BLL
 
         public void ModificarUsuario_33ZS(Usuario_33ZS usuario)
         {
+            ExigirPatente_33ZS("ModificacionUsuario");
             ValidarDatosBasicos_33ZS(usuario);
 
             Usuario_33ZS usuarioExistente = usuarioDAL.ObtenerUsuarioPorDNI_33ZS(usuario.DNI_33ZS);
@@ -196,6 +217,7 @@ namespace BLL
 
         public void DesbloquearUsuario_33ZS(string dni)
         {
+            ExigirPatente_33ZS("DesbloquearUsuario");
             if (string.IsNullOrWhiteSpace(dni))
                 throw new Exception("Usuario.SeleccioneUsuario");
 
@@ -216,6 +238,7 @@ namespace BLL
 
         public void CambiarEstadoUsuario_33ZS(string dni)
         {
+            ExigirPatente_33ZS("BajaUsuario");
             if (string.IsNullOrWhiteSpace(dni))
                 throw new Exception("Usuario.SeleccioneUsuario");
 
@@ -299,8 +322,7 @@ namespace BLL
 
         public void CambiarClave_33ZS(string claveActual, string claveNueva, string claveRepetida)
         {
-            if (!SessionManager_33ZS.HaySesionActiva_33ZS())
-                throw new Exception("Usuario.SinSesionActiva");
+            ExigirPatente_33ZS("CambiarClave");
 
             if (string.IsNullOrWhiteSpace(claveActual))
                 throw new Exception("Usuario.ClaveActualRequerida");

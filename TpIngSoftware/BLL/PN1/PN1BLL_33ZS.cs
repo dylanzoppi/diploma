@@ -132,7 +132,7 @@ namespace BLL.PN1
 
         public List<MedioPago_33ZS> ListarMediosPago()
         {
-            Exigir("RegistrarAtencion");
+            Exigir("RegistrarAtencion", "ConsultarAtencionesGenerales");
             return mapper.ListarMedios();
         }
 

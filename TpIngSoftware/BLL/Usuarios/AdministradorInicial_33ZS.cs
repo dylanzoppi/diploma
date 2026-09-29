@@ -58,12 +58,12 @@ namespace BLL
             MapperTransaction_33ZS.Ejecutar_33ZS(() =>
             {
                 new DigitoVerificadorBLL_33ZS().GenerarTodo_33ZS();
-                usuarios.AgregarUsuario_33ZS(new Usuario_33ZS(
+                usuarios.AgregarUsuarioInicial_33ZS(new Usuario_33ZS(
                     dni, apellidos, nombre, email, claveAdmin, "Administrador", email));
-                usuarios.AgregarUsuario_33ZS(new Usuario_33ZS(
+                usuarios.AgregarUsuarioInicial_33ZS(new Usuario_33ZS(
                     "90000001", "Ejemplo", "Demo Uno", EmailDemoUno_33ZS,
                     claveDemo, "Recepcionista", EmailDemoUno_33ZS));
-                usuarios.AgregarUsuario_33ZS(new Usuario_33ZS(
+                usuarios.AgregarUsuarioInicial_33ZS(new Usuario_33ZS(
                     "90000002", "Ejemplo", "Demo Dos", EmailDemoDos_33ZS,
                     claveDemo, "Barbero", EmailDemoDos_33ZS));
             });

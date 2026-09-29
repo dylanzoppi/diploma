@@ -11,6 +11,15 @@ namespace BLL
         private readonly BitacoraEventoBLL_33ZS _bitacora = new BitacoraEventoBLL_33ZS();
         private readonly DigitoVerificadorBLL_33ZS _dv = new DigitoVerificadorBLL_33ZS();
 
+        private static void ExigirPermiso_33ZS()
+        {
+            Usuario_33ZS actual = SessionManager_33ZS.HaySesionActiva_33ZS()
+                ? SessionManager_33ZS.GetInstance_33ZS().UsuarioActual_33ZS : null;
+            if (actual == null || !actual.Activo_33ZS || actual.Bloqueo_33ZS ||
+                !new PerfilBLL_33ZS().RolTienePatente_33ZS(actual.Rol_33ZS, "GestionRespaldos"))
+                throw new UnauthorizedAccessException("Su rol no tiene permiso para esta operación.");
+        }
+
         public string ObtenerCarpetaPorDefecto_33ZS()
         {
             return _dal.ObtenerCarpetaPorDefecto_33ZS();
@@ -18,6 +27,7 @@ namespace BLL
 
         public string RealizarBackup_33ZS(string carpetaDestino)
         {
+            ExigirPermiso_33ZS();
             if (string.IsNullOrWhiteSpace(carpetaDestino))
                 throw new Exception("Backup.DebeSeleccionarCarpetaDestino");
 
@@ -36,6 +46,7 @@ namespace BLL
 
         public void RealizarRestore_33ZS(string archivoBak)
         {
+            ExigirPermiso_33ZS();
             if (string.IsNullOrWhiteSpace(archivoBak))
                 throw new Exception("Backup.DebeSeleccionarArchivo");
 

@@ -15,6 +15,15 @@ namespace BLL
         private readonly BitacoraEventoBLL_33ZS bitacoraBLL = new BitacoraEventoBLL_33ZS();
         private readonly DigitoVerificadorBLL_33ZS dvBLL = new DigitoVerificadorBLL_33ZS();
 
+        private void ExigirPatente_33ZS(string patente)
+        {
+            Usuario_33ZS actual = SessionManager_33ZS.HaySesionActiva_33ZS()
+                ? SessionManager_33ZS.GetInstance_33ZS().UsuarioActual_33ZS : null;
+            if (actual == null || !actual.Activo_33ZS || actual.Bloqueo_33ZS ||
+                !RolTienePatente_33ZS(actual.Rol_33ZS, patente))
+                throw new UnauthorizedAccessException("Su rol no tiene permiso para esta operación.");
+        }
+
         private void GuardarConDV_33ZS(Action cambio, string login,
             TipoEvento_33ZS tipoEvento, int criticidad)
         {
@@ -177,6 +186,7 @@ namespace BLL
 
         public Familia_33ZS GuardarFamilia_33ZS(string nombre, List<Componente_33ZS> subComponentes)
         {
+            ExigirPatente_33ZS("AltaPerfil");
             nombre = NormalizarNombre_33ZS(nombre, "familia");
             ValidarSubComponentes_33ZS("familia", subComponentes);
 
@@ -230,6 +240,7 @@ namespace BLL
 
         public Familia_33ZS GuardarRol_33ZS(string nombre, List<Componente_33ZS> subComponentes)
         {
+            ExigirPatente_33ZS("AltaPerfil");
             nombre = NormalizarNombre_33ZS(nombre, "rol");
             ValidarSubComponentes_33ZS("rol", subComponentes);
 
@@ -254,6 +265,7 @@ namespace BLL
 
         public void EliminarFamilia_33ZS(int id)
         {
+            ExigirPatente_33ZS("BajaPerfil");
             if (_dal.FamiliaEnUso_33ZS(id))
                 throw new ArgumentException("Perfil.FamiliaEnUso");
 
@@ -286,6 +298,7 @@ namespace BLL
 
         public void ModificarFamilia_33ZS(int id, string nombre, List<Componente_33ZS> subComponentes)
         {
+            ExigirPatente_33ZS("ModificacionPerfil");
             nombre = NormalizarNombre_33ZS(nombre, "familia");
             ValidarSubComponentes_33ZS("familia", subComponentes, id);
 
@@ -303,6 +316,7 @@ namespace BLL
 
         public void ModificarRol_33ZS(int id, string nombre, List<Componente_33ZS> subComponentes)
         {
+            ExigirPatente_33ZS("ModificacionPerfil");
             nombre = NormalizarNombre_33ZS(nombre, "rol");
             ValidarSubComponentes_33ZS("rol", subComponentes);
 
@@ -331,6 +345,7 @@ namespace BLL
 
         public void EliminarRol_33ZS(int id)
         {
+            ExigirPatente_33ZS("BajaPerfil");
             if (_dal.RolEnUso_33ZS(id))
                 throw new ArgumentException("Perfil.RolEnUso");
 

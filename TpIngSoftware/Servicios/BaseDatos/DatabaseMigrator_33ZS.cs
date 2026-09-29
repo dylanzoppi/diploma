@@ -18,7 +18,8 @@ namespace Servicios
             new Migracion_33ZS("005_RolesPN1", "005_RolesPN1.sql"),
             new Migracion_33ZS("006_DatosPN1", "006_DatosPN1.sql"),
             new Migracion_33ZS("007_AtencionesPN1", "007_AtencionesPN1.sql"),
-            new Migracion_33ZS("008_CatalogoServiciosPN1", "008_CatalogoServiciosPN1.sql")
+            new Migracion_33ZS("008_CatalogoServiciosPN1", "008_CatalogoServiciosPN1.sql"),
+            new Migracion_33ZS("009_PermisosAtencionesPN1", "009_PermisosAtencionesPN1.sql")
         };
 
         public static void AplicarMigraciones_33ZS()
